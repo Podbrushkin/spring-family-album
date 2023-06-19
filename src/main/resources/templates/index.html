@@ -2,15 +2,9 @@
 
 <head>
     <link href="../../../resources/static/styles.css" rel="stylesheet" media="screen" th:href="@{styles.css}" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
-    
 </head>
 
 <body>
-    <!-- <header th:include="~{fragments/header :: header}" /> -->
-
-
     <form th:action="@{/}" th:object="${checkboxForm}" method="get" class="checkboxForm">
         <div style="columns: 3; column-gap: 20px;">
             <div th:each="tag, iter : ${selectableTags}">
@@ -26,38 +20,25 @@
                 th:text="${tag.name}+' ('+${tag.imagesCount}+')'"></option>
         </select>
         <div class="button-container">
-
-
-
             <button type="submit">Показать</button>
         </div>
     </form>
 
-    <!-- <div class="gallery" th:each="img : ${images}" >
-        <a target="_blank" th:href="@{/image/{img}(img=${img})}">
-            <img th:src="@{/image/{img}(img=${img})}" alt="Cinque Terre" width="600" height="400">
-        </a>
-        
-    </div> -->
-    <div class="gallery1">
-        <div class="gallery-sizer"></div>
-        <ul class="gallery">
-            
-            <li th:each="img : ${images}">
+    <ul class="gallery">
 
-                <a target="_blank" th:href="@{/image/{img}(img=${img.imageHash})}">
-                    <div class="gallery-item">
-                        <img th:src="@{/thumbnail/{img}(img=${img.imageHash})}"
-                            th:title="${img.creationDate} +'&#10;'+ ${img.filePath}">
+        <li th:each="img : ${images}">
 
-                    </div>
-                </a>
+            <a target="_blank" th:href="@{/image/{img}(img=${img.imageHash})}">
+                <div class="gallery-item">
+                    <img th:src="@{/thumbnail/{img}(img=${img.imageHash})}"
+                        th:title="${img.creationDate} +'&#10;'+ ${img.filePath}">
 
-                <!-- <div class="desc">Add a description of the image here</div> -->
-            </li>
-            <!-- </div> -->
-        </ul>
-    </div>
+                </div>
+            </a>
+        </li>
+
+    </ul>
+
     <br />
 
 
@@ -83,20 +64,7 @@
         <li th:text="'currentPage='+${currentPage}"></li>
         <li th:text="'pageSize='+${pageSize}"></li>
     </ul>
-    <script>
-       $(document).ready(function() {
-  var $grid = $('.gallery').masonry({
-    itemSelector: '.gallery-item',
-    columnWidth: '.gallery-sizer',
-    gutter: 10,
-    percentPosition: true
-  });
-  
-  $grid.imagesLoaded().progress( function() {
-    $grid.masonry('layout');
-  });
-});
-    </script>
+
 </body>
 
 </html>

@@ -54,7 +54,7 @@ h1 {
 
 
 
-/* .gallery {
+.gallery {
   display: flex;
   flex-wrap: wrap;
   list-style: none;
@@ -87,7 +87,7 @@ img {
 .gallery a {
   text-decoration: none;
   border: none;
-} */
+} 
 
 .pagination {
   display: flex;
@@ -153,16 +153,4 @@ img {
 
 input[type="checkbox"]:hover {
   outline: 2px solid grey;
-}
-
-.gallery-sizer {
-  width: calc(33.33% - 10px);
-}
-.gallery {
-  width: 100%;
-}
-
-.gallery-item {
-  display: block;
-  float: left;
 }
