@@ -1,0 +1,23 @@
+.gallery {
+    column-count: 4;
+    column-gap: 2px;
+  }
+  
+  .gallery-item {
+    break-inside: avoid-column;
+    margin-bottom: 2px;
+  }
+  
+  .gallery-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .gallery a {
+    text-decoration: none;
+    border: none;
+  }
+  .gallery li {
+    list-style: none;
+  } 

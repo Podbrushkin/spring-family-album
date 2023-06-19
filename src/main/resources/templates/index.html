@@ -2,6 +2,7 @@
 
 <head>
     <link href="../../../resources/static/styles.css" rel="stylesheet" media="screen" th:href="@{styles.css}" />
+    <link rel="stylesheet" media="screen" th:href="@{gallery.css}" />
 </head>
 
 <body>
@@ -25,18 +26,14 @@
     </form>
 
     <ul class="gallery">
-
         <li th:each="img : ${images}">
-
             <a target="_blank" th:href="@{/image/{img}(img=${img.imageHash})}">
                 <div class="gallery-item">
                     <img th:src="@{/thumbnail/{img}(img=${img.imageHash})}"
                         th:title="${img.creationDate} +'&#10;'+ ${img.filePath}">
-
                 </div>
             </a>
         </li>
-
     </ul>
 
     <br />
