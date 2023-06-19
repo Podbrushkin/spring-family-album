@@ -1,0 +1,102 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <link href="../../../resources/static/styles.css" rel="stylesheet" media="screen" th:href="@{styles.css}" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+    
+</head>
+
+<body>
+    <!-- <header th:include="~{fragments/header :: header}" /> -->
+
+
+    <form th:action="@{/}" th:object="${checkboxForm}" method="get" class="checkboxForm">
+        <div style="columns: 3; column-gap: 20px;">
+            <div th:each="tag, iter : ${selectableTags}">
+                <input type="checkbox" th:field="*{checkboxList}" th:value="${tag.id}"
+                    th:id="'checkbox-'+${iter.index}" />
+                <label th:text="${tag.name}+' ('+${tag.imagesCount}+')'" th:for="'checkbox-'+${iter.index}"></label>
+            </div>
+        </div>
+        <br />
+        <select name="selectedYear">
+            <option value="">Год</option>
+            <option th:each="tag : ${selectableYears}" th:value="${tag.id}"
+                th:text="${tag.name}+' ('+${tag.imagesCount}+')'"></option>
+        </select>
+        <div class="button-container">
+
+
+
+            <button type="submit">Показать</button>
+        </div>
+    </form>
+
+    <!-- <div class="gallery" th:each="img : ${images}" >
+        <a target="_blank" th:href="@{/image/{img}(img=${img})}">
+            <img th:src="@{/image/{img}(img=${img})}" alt="Cinque Terre" width="600" height="400">
+        </a>
+        
+    </div> -->
+    <div class="gallery1">
+        <div class="gallery-sizer"></div>
+        <ul class="gallery">
+            
+            <li th:each="img : ${images}">
+
+                <a target="_blank" th:href="@{/image/{img}(img=${img.imageHash})}">
+                    <div class="gallery-item">
+                        <img th:src="@{/thumbnail/{img}(img=${img.imageHash})}"
+                            th:title="${img.creationDate} +'&#10;'+ ${img.filePath}">
+
+                    </div>
+                </a>
+
+                <!-- <div class="desc">Add a description of the image here</div> -->
+            </li>
+            <!-- </div> -->
+        </ul>
+    </div>
+    <br />
+
+
+    <div th:if="${totalPages > 1}">
+
+        <ul class="pagination">
+            <li th:if="${currentPage > 1}">
+                <a th:href="@{''(page=${currentPage - 1}, pageSize=${pageSize})}">&lt; Previous</a>
+            </li>
+
+            <li th:each="page : ${#numbers.sequence(1, totalPages)}" th:class="${page == currentPage} ? active : ''">
+                <a th:href="@{''(page=${page}, pageSize=${pageSize})}" th:text="${page}"></a>
+            </li>
+
+            <li th:if="${currentPage < totalPages}">
+                <a th:href="@{''(page=${currentPage + 1}, pageSize=${pageSize})}">Next &gt;</a>
+            </li>
+        </ul>
+    </div>
+    <ul>
+        <li th:text="'totalImages='+${totalImages}"></li>
+        <li th:text="'totalPages='+${totalPages}"></li>
+        <li th:text="'currentPage='+${currentPage}"></li>
+        <li th:text="'pageSize='+${pageSize}"></li>
+    </ul>
+    <script>
+       $(document).ready(function() {
+  var $grid = $('.gallery').masonry({
+    itemSelector: '.gallery-item',
+    columnWidth: '.gallery-sizer',
+    gutter: 10,
+    percentPosition: true
+  });
+  
+  $grid.imagesLoaded().progress( function() {
+    $grid.masonry('layout');
+  });
+});
+    </script>
+</body>
+
+</html>
