@@ -15,7 +15,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,10 +30,7 @@ import jakarta.servlet.http.HttpSession;
 @SessionAttributes("checkboxForm")
 public class MainController {
 	Logger log = LoggerFactory.getLogger(getClass());
-	List<String> sampleImageHashes = List.of("7993899cc8b4e72fcc895cf51fda0d074cc86e1d9f2be116e76d4feb413baec2",
-			"0fcf0b51425db3f880b17ac9cedf087537f6cef4a6c48c290eaf2bfec60435fb",
-			"ebd7cb53db6b833421ea1109a6eb85e1bbf9584547da5c337ab421a6f766f10f");
-
+	
 	@Autowired
 	ImageProvider imageProvider;
 	@Autowired

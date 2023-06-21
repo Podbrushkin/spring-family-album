@@ -1,19 +1,25 @@
 package com.example.demo;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.model.Image;
@@ -24,19 +30,70 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @Component
 public class Catalog {
     Logger log = LoggerFactory.getLogger(getClass());
-    // private Path jsonFile = Path.of("C:\\Users\\user\\tagToHashes 20230531.json");
-    // private Path tagToImagesJson = Path.of("C:\\Users\\user\\tagToImages 20230602.json");
-    private Path imageObjectsJson = Path.of("C:\\Users\\user\\imageObjects 20230609.json");
+    private Path imageObjectsJson;
+    private Path tagIdToNameFile;
+    private Map<String,String> tagIdToNameMap;
+    private Set<Image> imageObjects;
+    private Map<String,Image> mgckHashToImageMap;
+    private Set<String> tags;
+    private Map<String, Path> imHashToPath;
+    private Map<String, Path> dgkmHashToThumbPath;
 
-    private Path tagIdToNameFile = Path.of("C:\\Users\\user\\Documents\\RelativesDates.txt");
-    // private Map<String,TreeSet<String>> tagToHashesMap = readTagToHashesMap(jsonFile);
-    // private Map<String,Set<Image>> tagToImagesMap = readTagToImagesMap(tagToImagesJson);
-    private Map<String,String> tagIdToNameMap = readTagIdToNameMap(tagIdToNameFile);
-    
-    
-    private Set<Image> imageObjects = readImageObjectsFromJson(imageObjectsJson);
-    private Map<String,Image> mgckHashToImageMap = createMgckHashToImageMap();
-    private Set<String> tags = getTags();
+    public Catalog (
+        @Value("${filepaths.imageObjectsJson}") String imageObjectsJsonStr,
+        @Value("${filepaths.tagIdToNameFile}") String tagIdToNameFileStr,
+        @Value("${filepaths.imageMagickHashFiles}") String[] imHashFiles,
+        @Value("${filepaths.thumbsDirectory}") String thumbsDirectory
+    ) {
+        this.imageObjectsJson = Path.of(imageObjectsJsonStr);
+        this.tagIdToNameFile = Path.of(tagIdToNameFileStr);
+        log.trace("{} {}", imageObjectsJsonStr, tagIdToNameFileStr);
+        tagIdToNameMap = readTagIdToNameMap(tagIdToNameFile);
+        imageObjects = readImageObjectsFromJson(imageObjectsJson);
+        mgckHashToImageMap = createMgckHashToImageMap();
+        tags = getTags();
+
+        this.imHashToPath = initHashToFilepath(imHashFiles);
+        this.dgkmHashToThumbPath = initDgkmHashToThumb(Path.of(thumbsDirectory));
+    }
+
+    private Map<String, Path> initHashToFilepath(String[] imHashFiles) {
+        log.trace("Найдено {} paths to files with imageMagick hashes.", imHashFiles.length);
+        Map<String, Path> hashToPath = new HashMap<>();
+        Set<Path> tsvFiles = new HashSet<Path>();
+
+        for (var filePath : imHashFiles) {
+            var exists = new File(filePath).exists();
+            log.trace("{} exists: {}", filePath, exists);
+            if (exists) {
+                tsvFiles.add(Path.of(filePath));
+            }
+        }
+
+        for (var tsvFile : tsvFiles) {
+            hashToPath.putAll(tsvToMap(tsvFile));
+        }
+        return hashToPath;
+    }
+
+    private Map<String, Path> initDgkmHashToThumb(Path thumbsDirectory) {
+        Map<String, Path> dgkmHashToThumbPath = new HashMap<>();
+        Pattern pattern = Pattern.compile("([\\d\\w]{32})\\.(png|jpg)");
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(thumbsDirectory, "*.{png,jpg}")) {
+            for (Path path : stream) {
+                String fileName = path.getFileName().toString();
+                Matcher matcher = pattern.matcher(fileName);
+                if (matcher.matches()) {
+                    String hash = matcher.group(1);
+                    dgkmHashToThumbPath.put(hash, path);
+                }
+            }
+        } catch (IOException e) {
+            log.warn("Failed to get thumbnail file paths:", e);
+        }
+        return dgkmHashToThumbPath;
+    }
 
     private Map<String,Image> createMgckHashToImageMap() {
         return
@@ -45,18 +102,6 @@ public class Catalog {
     public Image getImageForMgckHash(String mgckHash) {
         return mgckHashToImageMap.get(mgckHash);
     }
-
-    /* private Map<String,TreeSet<String>> readTagToHashesMap(Path jsonFile) {
-
-        try {
-            return
-                new ObjectMapper()
-                    .readValue(jsonFile.toFile(), new TypeReference<Map<String, TreeSet<String>>>() {});
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    } */
 
     public Map<Integer, Long> getNumberOfPhotosByYear() {
         return imageObjects.stream()
@@ -68,20 +113,6 @@ public class Catalog {
     public Stream<Image> getImageObjects() {
         return imageObjects.stream();
     }
-
-    // public Map<Integer, Integer> getNumberOfPhotosByYear() {
-    // Map<Integer, Integer> yearToImageCountMap = new HashMap<>();
-    //     for (Set<Image> images : tagToImagesMap.values()) {
-    //         for (Image image : images) {
-    //             LocalDateTime creationDate = image.getCreationDate();
-    //             if (creationDate != null) {
-    //                 int year = creationDate.getYear();
-    //                 yearToImageCountMap.put(year, yearToImageCountMap.getOrDefault(year, 0) + 1);
-    //             }
-    //         }
-    //     }
-    //     return yearToImageCountMap;
-    // }
 
     private Set<Image> readImageObjectsFromJson(Path imageObjectsJson) {
         var objectMapper = new ObjectMapper();
@@ -98,44 +129,12 @@ public class Catalog {
         return imageObjects;
     }
 
-    /* private Map<String,Set<Image>> readTagToImagesMap(Path tagToImagesJson) {
-        var objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new SimpleModule().addDeserializer(Image.class, new ImageDeserializer()));
-        try {
-            return
-                objectMapper
-                    .readValue(tagToImagesJson.toFile(), new TypeReference<Map<String, Set<Image>>>() {});
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    } */
-
     public Stream<Image> getImagesForTag(String tag) {
         log.info("Asked for {} tag.",tag);
-        // return tagToHashesMap.get(tag).stream().limit(10).collect(Collectors.toSet());
         return
         imageObjects.stream()
             .filter(img -> img.getTags().contains(tag));
-        // return
-        //     tagToImagesMap.get(tag).stream();
-            
     }
-
-    /* public Collection<String> getHashesForTag(String tag) {
-        log.info("Asked for {} tag.",tag);
-        // return tagToHashesMap.get(tag).stream().limit(10).collect(Collectors.toSet());
-        return
-        tagToImagesMap.get(tag).stream()
-            .sorted(Comparator.comparing(Image::getCreationDate))
-            .map(Image::getImageHash)
-            .collect(Collectors.toList());
-
-        // return tagToHashesMap.get(tag);
-    } */
-
-
-
 
     public Set<String> getTags() {
         if (tags == null) {
@@ -146,13 +145,12 @@ public class Catalog {
             log.info("Found {} unique tags.", tags.size());
         }
         return tags;
-            
-        // return new ArrayList<String>(tagToImagesMap.keySet());
     }
 
     public String getTagNameExtended(String tagId) {
         return tagIdToNameMap.get(tagId);
     }
+
     private Map<String,String> readTagIdToNameMap(Path tagIdToNameFile) {
         var tagIdToNameMap = new HashMap<String,String>();
         
@@ -170,4 +168,28 @@ public class Catalog {
         return tagIdToNameMap;
     }
     
+    private Map<String, Path> tsvToMap(Path tsvFile) {
+
+        var hashToPath = new HashMap<String, Path>();
+
+        try {
+            Files.lines(tsvFile)
+                    .forEach((line -> {
+                        String str[] = line.split("\t");
+                        hashToPath.put(str[1], Path.of(str[0]));
+                    }));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return hashToPath;
+    }
+
+    public Map<String,Path> getImHashToPathMap() {
+        return imHashToPath;
+    }
+    public Map<String,Path> getDgkmHashToThumbPathMap() {
+        return dgkmHashToThumbPath;
+    }
+    
+
 }
