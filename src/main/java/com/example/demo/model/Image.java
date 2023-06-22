@@ -6,18 +6,12 @@ import java.util.Set;
 
 public class Image {
 
-    String imageHash;
-    String dgkmHash;
-    public String getDgkmHash() {
-        return dgkmHash;
-    }
-    public void setDgkmHash(String dgkmHash) {
-        this.dgkmHash = dgkmHash;
-    }
-
-    LocalDateTime creationDate;
-    Path filePath;
-    Set<String> tags;
+    private String imageHash;
+    private String dgkmHash;
+    private LocalDateTime creationDate;
+    private Path filePath;
+    private Path thumbPath;
+    private Set<String> tags;
 
     public Image(
             LocalDateTime creationDate,
@@ -28,6 +22,7 @@ public class Image {
         this.filePath = Path.of(fullName);
         this.imageHash = imageHash;
     }
+
     public Image(
             LocalDateTime creationDate,
             String fullName,
@@ -39,6 +34,7 @@ public class Image {
         this.imageHash = imageHash;
         this.tags = tags;
     }
+
     public Image(
             LocalDateTime creationDate,
             String fullName,
@@ -62,6 +58,14 @@ public class Image {
         this.imageHash = hash;
     }
 
+    public String getDgkmHash() {
+        return dgkmHash;
+    }
+
+    public void setDgkmHash(String dgkmHash) {
+        this.dgkmHash = dgkmHash;
+    }
+
     public Path getFilePath() {
         return filePath;
     }
@@ -69,8 +73,6 @@ public class Image {
     public void setFilePath(Path filePath) {
         this.filePath = filePath;
     }
-
-    
 
     public void setImageHash(String hash) {
         this.imageHash = hash;
@@ -95,6 +97,14 @@ public class Image {
     public void setTags(Set<String> tags) {
         this.tags = tags;
     }
+    public Path getThumbPath() {
+        return thumbPath;
+    }
+
+    public void setThumbPath(Path thumbPath) {
+        this.thumbPath = thumbPath;
+    }
+
 
     @Override
     public int hashCode() {

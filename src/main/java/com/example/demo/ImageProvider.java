@@ -56,10 +56,12 @@ public class ImageProvider {
     }
 
     public byte[] getThumbnailBytes(Image image) {
-        Path imageFile = dgkmHashToThumbPath.get(image.getDgkmHash());
-        if (imageFile != null) {
+        // Path imageFile = dgkmHashToThumbPath.get(image.getDgkmHash());
+        Path thumbFile = image.getThumbPath();
+
+        if (thumbFile != null) {
             log.trace("Found thumbnail for {}", image.getImageHash());
-            try (InputStream is = new FileInputStream(imageFile.toFile())) {
+            try (InputStream is = new FileInputStream(thumbFile.toFile())) {
                 return is.readAllBytes();
             } catch (IOException e) {
                 e.printStackTrace();
