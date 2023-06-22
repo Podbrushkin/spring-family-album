@@ -60,14 +60,14 @@ public class ImageProvider {
         Path thumbFile = image.getThumbPath();
 
         if (thumbFile != null) {
-            log.trace("Found thumbnail for {}", image.getImageHash());
+            log.trace("Found thumbnail for {}", image.getImHash());
             try (InputStream is = new FileInputStream(thumbFile.toFile())) {
                 return is.readAllBytes();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            return getImageBytes(image.getImageHash());
+            return getImageBytes(image.getImHash());
         }
         return null;
     }

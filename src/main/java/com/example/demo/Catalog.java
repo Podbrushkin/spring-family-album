@@ -126,7 +126,7 @@ public class Catalog {
     }
 
     private Map<String, Image> createMgckHashToImageMap() {
-        return getImageObjects().collect(Collectors.toMap(Image::getImageHash, img -> img));
+        return getImageObjects().collect(Collectors.toMap(Image::getImHash, img -> img));
     }
 
     public Image getImageForMgckHash(String mgckHash) {

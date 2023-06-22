@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class Image {
 
-    private String imageHash;
+    private String imHash;
     private String dgkmHash;
     private LocalDateTime creationDate;
     private Path filePath;
@@ -16,46 +16,46 @@ public class Image {
     public Image(
             LocalDateTime creationDate,
             String fullName,
-            String imageHash) {
+            String imHash) {
 
         this.creationDate = creationDate;
         this.filePath = Path.of(fullName);
-        this.imageHash = imageHash;
+        this.imHash = imHash;
     }
 
     public Image(
             LocalDateTime creationDate,
             String fullName,
-            String imageHash,
+            String imHash,
             Set<String> tags) {
 
         this.creationDate = creationDate;
         this.filePath = Path.of(fullName);
-        this.imageHash = imageHash;
+        this.imHash = imHash;
         this.tags = tags;
     }
 
     public Image(
             LocalDateTime creationDate,
             String fullName,
-            String imageHash,
+            String imHash,
             String dgkmHash,
             Set<String> tags) {
 
         this.creationDate = creationDate;
         this.filePath = Path.of(fullName);
-        this.imageHash = imageHash;
+        this.imHash = imHash;
         this.dgkmHash = dgkmHash;
         this.tags = tags;
     }
 
     public Image(String hash, Set<String> tags) {
-        this.imageHash = hash;
+        this.imHash = hash;
         this.tags = tags;
     }
 
     public Image(String hash) {
-        this.imageHash = hash;
+        this.imHash = hash;
     }
 
     public String getDgkmHash() {
@@ -74,16 +74,16 @@ public class Image {
         this.filePath = filePath;
     }
 
-    public void setImageHash(String hash) {
-        this.imageHash = hash;
+    public void setImHash(String hash) {
+        this.imHash = hash;
     }
 
     public void setCreationDate(LocalDateTime dateTaken) {
         this.creationDate = dateTaken;
     }
 
-    public String getImageHash() {
-        return imageHash;
+    public String getImHash() {
+        return imHash;
     }
 
     public LocalDateTime getCreationDate() {
@@ -110,7 +110,7 @@ public class Image {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((imageHash == null) ? 0 : imageHash.hashCode());
+        result = prime * result + ((imHash == null) ? 0 : imHash.hashCode());
         return result;
     }
 
@@ -123,10 +123,10 @@ public class Image {
         if (getClass() != obj.getClass())
             return false;
         Image other = (Image) obj;
-        if (imageHash == null) {
-            if (other.imageHash != null)
+        if (imHash == null) {
+            if (other.imHash != null)
                 return false;
-        } else if (!imageHash.equals(other.imageHash))
+        } else if (!imHash.equals(other.imHash))
             return false;
         return true;
     }
