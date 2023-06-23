@@ -27,7 +27,7 @@
 
     <ul class="gallery">
         <li th:each="img : ${images}">
-            <a target="_blank" th:href="@{/image/{img}(img=${img.imHash})}">
+            <a th:href="@{/imagePage/{img}(img=${img.imHash})}">
                 <div class="gallery-item">
                     <img th:src="@{/thumbnail/{img}(img=${img.imHash})}"
                         th:title="${img.creationDate} +'&#10;'+ ${img.filePath}">

@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,12 +67,20 @@ public class MainController {
 		return new CheckboxForm();
 	}
 
-	 @GetMapping(value="/")
+	@GetMapping(value="/")
 	public String index(ModelMap model) {
 
 		// model.put("checkboxForm", new CheckboxForm());
 		log.info("index() was called");
 		return "index.html";
+	}
+
+	@GetMapping(value="/", params="tags")
+	public String processQueryParams(@ModelAttribute("checkboxForm") CheckboxForm form, @RequestParam List<String> tags) {
+		log.trace("processQueryParams: we'll clear this {} and add this {}", form.getCheckboxList(), tags);
+		form.getCheckboxList().clear();
+		form.getCheckboxList().addAll(tags);
+		return "redirect:/?selectedYear=";
 	}
 
 	@GetMapping(value="/", params="selectedYear")
@@ -148,6 +157,18 @@ public class MainController {
 		os.write(image, 0, image.length);
 	}
 
+	@GetMapping("/imagePage/{imgHash:[^\\\\.]+}")
+	public String getImagePageByHash(@PathVariable(required = true) String imgHash, ModelMap model) {
+		var img = catalog.getImageForMgckHash(imgHash);
+		model.addAttribute("image", img);
+		List<Tag> selectableTags = (List<Tag>) model.getAttribute("selectableTags");
+		var map =
+			selectableTags.stream()
+			.filter(tag -> img.getTags().contains(tag.getId()))
+			.collect(Collectors.toMap(Tag::getId,Tag::getName));
+		model.addAttribute("fullnames", map);
+		return "image.html";
+	}
 	class Tag {
 		String id;
 		String name;

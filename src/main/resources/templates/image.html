@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Viewer</title>
+    <link rel="stylesheet" media="screen" th:href="@{~/styles.css}" />
+    <style>
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- <h1>Image Viewer</h1> -->
+    <div class="button-container">
+    <a href="/">Домой</a></div>
+    <img th:src="@{'/image/' + ${image.imHash}}" th:alt="${image.imHash}" />
+    <h2>Люди на фотографии:</h2>
+    <ul>
+        <li th:each="person : ${image.tags}">
+            <a th:href="@{/(tags=${person})}" th:text="${fullnames.get(person)}"></a>
+        </li>
+    </ul>
+</body>
+</html>
