@@ -22,7 +22,7 @@ filepaths:
     tagIdToNameFile: C:\Users\user\Documents\RelativesDates.txt
     thumbsDirectory: C:\users\user\thumbs\
     whiteListDirectories: null
-    blackListDirectories: null
+    blackListDirectories: E:\PHOTOS\Старые фотографии\Виталик
 
 #logging.level.org.springframework=DEBUG
 #logging.level.org.springframework.core.io=TRACE

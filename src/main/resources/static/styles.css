@@ -2,92 +2,14 @@ body {
   margin: 0;
   padding: 0;
   background-color: LightGrey;
-  /* background-color: LightBlue; */
 }
-
-
-h1 {
-  background: #acacac;
-  box-sizing: border-box;
-  padding: 0.5%;
-  text-align: center;
-  color: #333;
-  font-size: 30px;
-  margin: 0 0 2% 0;
-}
-
-
-.navbar {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: #333;
-}
-
-.navbar li {
-  float: left;
-}
-
-.navbar li a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-.navbar li a:hover:not(.active, #greeting) {
-  background-color: #111;
-}
-
-.navbar .active {
-  background-color: #04AA6D;
-}
-
-.navbar #logo {
-  display: inline-block;
-  font-weight: bold;
-  color: LightBlue;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* .gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  grid-auto-rows: auto;
-  grid-gap: 2px;
-}
-
-@media screen and (max-width: 1024px) {
-  .gallery li {
-    height: 20vh;
-    flex-basis: calc(100% / 4);
-  }
-}
-
-.gallery-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.gallery a {
-  text-decoration: none;
-  border: none;
-}
-.gallery li {
-  list-style: none;
-}  */
-
-
-
 
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   list-style: none;
+  flex-wrap: wrap;
 }
 
 .pagination li {
@@ -102,41 +24,28 @@ h1 {
 
 .checkboxForm button[type="submit"] {
   background-color: #4CAF50;
-  /* Set the background color */
   border: none;
-  /* Remove the border */
   color: white;
-  /* Set the text color */
   padding: 10px 20px;
-  /* Add some padding */
   text-align: center;
-  /* Center the text */
   text-decoration: none;
-  /* Remove the underline */
   display: inline-block;
-  /* Make the button a block element */
   font-size: 16px;
-  /* Set the font size */
   cursor: pointer;
-  /* Change the cursor on hover */
-  border-radius: 5px;
-  /* Add some border radius */
+  border-radius: 5px; 
 }
 
 
 .checkboxForm button[type="submit"]:hover {
   background-color: #3e8e41;
-  /* Change the background color on hover */
 }
 
 .checkboxForm form {
   text-align: left;
-  /* Align other contents of the form left */
 }
 
 .checkboxForm .button-container {
   text-align: center;
-  /* Center the button horizontally */
 }
 
 
@@ -147,4 +56,8 @@ h1 {
 
 input[type="checkbox"]:hover {
   outline: 2px solid grey;
+}
+
+input[type=checkbox]:checked ~ label {
+  font-weight: bold;
 }
