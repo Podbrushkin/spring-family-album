@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Image Viewer</title>
@@ -7,15 +8,31 @@
     <style>
         img {
             max-width: 100%;
+            max-height: 100vh;
             height: auto;
+            display: block;
+            margin: 0 auto;
         }
     </style>
 </head>
+
 <body>
     <!-- <h1>Image Viewer</h1> -->
     <div class="button-container">
-    <a href="/">Домой</a></div>
+        <a href="/">Домой</a>
+    </div>
     <img th:src="@{'/image/' + ${image.imHash}}" th:alt="${image.imHash}" />
+
+    <div class="button-container">
+        <a th:if="${previous != null}" th:href="@{/imagePage/{imHash}(imHash=${previous.imHash})}" style="float: left;">
+            Назад
+        </a>
+
+        <a th:if="${next != null}" th:href="@{/imagePage/{imHash}(imHash=${next.imHash})}" style="float: right;">
+            Вперёд
+        </a>
+    </div>
+    <br><br>
     <h2>Люди на фотографии:</h2>
     <ul>
         <li th:each="person : ${image.tags}">
@@ -23,4 +40,5 @@
         </li>
     </ul>
 </body>
+
 </html>

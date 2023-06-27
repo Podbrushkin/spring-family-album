@@ -31,7 +31,7 @@ import jakarta.servlet.http.HttpSession;
 @SessionAttributes("checkboxForm")
 public class MainController {
 	Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	@Autowired
 	ImageProvider imageProvider;
 	@Autowired
@@ -67,7 +67,7 @@ public class MainController {
 		return new CheckboxForm();
 	}
 
-	@GetMapping(value="/")
+	@GetMapping(value = "/")
 	public String index(ModelMap model) {
 
 		// model.put("checkboxForm", new CheckboxForm());
@@ -75,15 +75,16 @@ public class MainController {
 		return "index.html";
 	}
 
-	@GetMapping(value="/", params="tags")
-	public String processQueryParams(@ModelAttribute("checkboxForm") CheckboxForm form, @RequestParam List<String> tags) {
+	@GetMapping(value = "/", params = "tags")
+	public String processQueryParams(@ModelAttribute("checkboxForm") CheckboxForm form,
+			@RequestParam List<String> tags) {
 		log.trace("processQueryParams: we'll clear this {} and add this {}", form.getCheckboxList(), tags);
 		form.getCheckboxList().clear();
 		form.getCheckboxList().addAll(tags);
 		return "redirect:/?selectedYear=";
 	}
 
-	@GetMapping(value="/", params="selectedYear")
+	@GetMapping(value = "/", params = "selectedYear")
 	public String processForm(@ModelAttribute("checkboxForm") CheckboxForm form, ModelMap model,
 			HttpSession session) {
 		log.info("processform() was called");
@@ -114,7 +115,7 @@ public class MainController {
 		log.info("Selected size: " + selectedTags.size());
 		log.info("Selected: " + selectedTags);
 		log.info("Selected year: " + selectedYear);
-		
+
 		var imagePage = imageService.getImagesForTags(selectedTags, selectedYear, page, pageSize);
 		model.put("images", imagePage.getItems());
 
@@ -143,6 +144,7 @@ public class MainController {
 
 		os.write(image, 0, image.length);
 	}
+
 	@RequestMapping(value = "/thumbnail/{imgHash}", method = RequestMethod.GET)
 	public @ResponseBody void getThumbnailByHash(@PathVariable(required = true) String imgHash,
 			HttpServletResponse response, HttpServletRequest request) throws IOException, NullPointerException {
@@ -158,17 +160,26 @@ public class MainController {
 	}
 
 	@GetMapping("/imagePage/{imgHash:[^\\\\.]+}")
-	public String getImagePageByHash(@PathVariable(required = true) String imgHash, ModelMap model) {
+	public String getImagePageByHash(@PathVariable(required = true) String imgHash,
+			@SessionAttribute List<String> selectedTags,
+			@SessionAttribute Optional<Integer> selectedYear,
+			ModelMap model) {
 		var img = catalog.getImageForMgckHash(imgHash);
 		model.addAttribute("image", img);
 		List<Tag> selectableTags = (List<Tag>) model.getAttribute("selectableTags");
-		var map =
-			selectableTags.stream()
-			.filter(tag -> img.getTags().contains(tag.getId()))
-			.collect(Collectors.toMap(Tag::getId,Tag::getName));
+		var map = selectableTags.stream()
+				.filter(tag -> img.getTags().contains(tag.getId()))
+				.collect(Collectors.toMap(Tag::getId, Tag::getName));
 		model.addAttribute("fullnames", map);
+
+		var prevAndNext = imageService.getNextAndPreviousImages(selectedTags, selectedYear, imgHash);
+		
+		model.put("previous", prevAndNext.get("previous"));
+		model.put("next", prevAndNext.get("next"));
+
 		return "image.html";
 	}
+
 	class Tag {
 		String id;
 		String name;

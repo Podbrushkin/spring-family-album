@@ -6,6 +6,8 @@
 </head>
 
 <body>
+    <div class="button-container" >
+        <a href="/" style="background-color:grey;">Домой</a></div>
     <form th:action="@{/}" th:object="${checkboxForm}" method="get" class="checkboxForm">
         <div style="columns: 3; column-gap: 20px;">
             <div th:each="tag, iter : ${selectableTags}">
