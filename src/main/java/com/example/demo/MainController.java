@@ -28,7 +28,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-@SessionAttributes("checkboxForm")
+@SessionAttributes({"selectedTags","selectedYear","currentPage","pageSize"})
 public class MainController {
 	Logger log = LoggerFactory.getLogger(getClass());
 
@@ -61,10 +61,12 @@ public class MainController {
 		selectableYears.sort(Comparator.comparing(t -> t.getName()));
 		return selectableYears;
 	}
-
-	@ModelAttribute("checkboxForm")
-	public CheckboxForm addCheckboxForm() {
-		return new CheckboxForm();
+	@ModelAttribute("fullnames")
+	public Map<String,String> addFullnames(ModelMap model) {
+	List<Tag> selectableTags = (List<Tag>) model.getAttribute("selectableTags");
+		var map = selectableTags.stream()
+				.collect(Collectors.toMap(Tag::getId, Tag::getName));
+		return map;
 	}
 
 	@GetMapping(value = "/")
@@ -75,61 +77,45 @@ public class MainController {
 		return "index.html";
 	}
 
-	@GetMapping(value = "/", params = "tags")
-	public String processQueryParams(@ModelAttribute("checkboxForm") CheckboxForm form,
-			@RequestParam List<String> tags) {
-		log.trace("processQueryParams: we'll clear this {} and add this {}", form.getCheckboxList(), tags);
-		form.getCheckboxList().clear();
-		form.getCheckboxList().addAll(tags);
-		return "redirect:/?selectedYear=";
+	@GetMapping(value = "/processForm")
+	public String processForm(
+			@RequestParam(required = false) List<String> tag,
+			@RequestParam Optional<Integer> selectedYear,
+			ModelMap model) {
+		
+		if (tag == null) {tag = List.of();}
+		log.trace("RequestParams: tags={}, year={}", tag, selectedYear);
+		model.put("selectedTags", tag);
+		model.put("selectedYear", selectedYear);
+		return "redirect:/search";
 	}
 
-	@GetMapping(value = "/", params = "selectedYear")
-	public String processForm(@ModelAttribute("checkboxForm") CheckboxForm form, ModelMap model,
-			HttpSession session) {
-		log.info("processform() was called");
-		List<String> selectedTags = form.getCheckboxList();
-		String selectedYearStr = form.getSelectedYear();
-		Integer selectedYear = selectedYearStr.isBlank() ? null : Integer.parseInt(selectedYearStr);
-
-		Optional<Integer> selectedYearOpt = Optional.ofNullable(selectedYear);
-		session.setAttribute("selectedTags", selectedTags);
-		session.setAttribute("selectedYear", selectedYearOpt);
-
-		model.remove("totalPages");
-		model.remove("currentPage");
-		model.remove("pageSize");
-		//
-		return "redirect:/listImages";
-	}
-
-	@GetMapping("/listImages")
-	public String listImages(
-			ModelMap model,
+	@GetMapping(value = "/search")
+	public String processQueryParams(
 			@SessionAttribute List<String> selectedTags,
 			@SessionAttribute Optional<Integer> selectedYear,
 			@RequestParam(name = "page", defaultValue = "1") int page,
 			@RequestParam(name = "pageSize", defaultValue = "40") int pageSize,
+			@RequestParam(name = "goBack", defaultValue = "false") boolean goBack,
+			ModelMap model,
 			HttpSession session) {
+		log.trace("SessionAttrs: tags={}, year={}", selectedTags, selectedYear);
 
-		log.info("Selected size: " + selectedTags.size());
-		log.info("Selected: " + selectedTags);
-		log.info("Selected year: " + selectedYear);
-
+		if (goBack) {
+			page = (int) session.getAttribute("currentPage");
+			pageSize = (int) session.getAttribute("pageSize");
+		}
+		
 		var imagePage = imageService.getImagesForTags(selectedTags, selectedYear, page, pageSize);
 		model.put("images", imagePage.getItems());
-
-		// Pass the current page, page size, and total number of images to the template
-		// int totalImages = imageService.countImagesForTags(selectedTags);
-		// int totalPages = (int) Math.ceil(totalImages / (double) pageSize);
 		model.addAttribute("currentPage", page);
 		model.addAttribute("pageSize", pageSize);
 		model.addAttribute("totalPages", imagePage.getTotalPages());
 		model.addAttribute("totalImages", imagePage.getTotalItems());
-		// session.removeAttribute("selectedTags");
-
+		
 		return "index.html";
 	}
+	
 
 	@RequestMapping(value = "/image/{imgHash}", method = RequestMethod.GET)
 	public @ResponseBody void getImageByHash(@PathVariable(required = true) String imgHash,
@@ -166,14 +152,8 @@ public class MainController {
 			ModelMap model) {
 		var img = catalog.getImageForMgckHash(imgHash);
 		model.addAttribute("image", img);
-		List<Tag> selectableTags = (List<Tag>) model.getAttribute("selectableTags");
-		var map = selectableTags.stream()
-				.filter(tag -> img.getTags().contains(tag.getId()))
-				.collect(Collectors.toMap(Tag::getId, Tag::getName));
-		model.addAttribute("fullnames", map);
-
 		var prevAndNext = imageService.getNextAndPreviousImages(selectedTags, selectedYear, imgHash);
-		
+
 		model.put("previous", prevAndNext.get("previous"));
 		model.put("next", prevAndNext.get("next"));
 
@@ -225,31 +205,4 @@ public class MainController {
 
 	}
 
-	public class CheckboxForm {
-		private List<String> checkboxList;
-		private String selectedYear;
-
-		public String getSelectedYear() {
-			return selectedYear;
-		}
-
-		public void setSelectedYear(String selectedYear) {
-			this.selectedYear = selectedYear;
-		}
-
-		public List<String> getCheckboxList() {
-			return checkboxList;
-		}
-
-		public void setCheckboxList(List<String> checkboxList) {
-			this.checkboxList = checkboxList;
-		}
-
-		@Override
-		public String toString() {
-			return "CheckboxForm [checkboxList=" + checkboxList + "]";
-		}
-
-		// getters and setters
-	}
 }

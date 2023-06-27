@@ -8,10 +8,11 @@
 <body>
     <div class="button-container" >
         <a href="/" style="background-color:grey;">Домой</a></div>
-    <form th:action="@{/}" th:object="${checkboxForm}" method="get" class="checkboxForm">
+    
+    <form th:action="@{/processForm}" method="get" class="checkboxForm">
         <div style="columns: 3; column-gap: 20px;">
             <div th:each="tag, iter : ${selectableTags}">
-                <input type="checkbox" th:field="*{checkboxList}" th:value="${tag.id}"
+                <input type="checkbox" name="tag" th:value="${tag.id}"
                     th:id="'checkbox-'+${iter.index}" />
                 <label th:text="${tag.name}+' ('+${tag.imagesCount}+')'" th:for="'checkbox-'+${iter.index}"></label>
             </div>
@@ -26,6 +27,11 @@
             <button type="submit">Показать</button>
         </div>
     </form>
+   
+    <span th:each="tag : ${selectedTags}">
+        <span th:text="${fullnames.get(tag)} + ','"></span>
+    </span>
+    <span th:text="${selectedYear.isPresent() ? selectedYear.get() : 'любой'} + ' год. Найдено '+${totalImages}+' фотографий.'"></span>
 
     <ul class="gallery">
         <li th:each="img : ${images}">
