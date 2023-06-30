@@ -21,14 +21,14 @@
     <div class="button-container">
         <a href="/search?goBack=true">&lt; Галерея</a>
     </div>
-    <img th:src="@{'/image/' + ${image.imHash}}" th:alt="${image.imHash}" />
+    <img th:src="@{'/image/' + ${image.hash}}" th:alt="${image.hash}" />
 
     <div class="button-container">
-        <a th:if="${previous != null}" th:href="@{/imagePage/{imHash}(imHash=${previous.imHash})}" style="float: left;">
+        <a th:if="${previous != null}" th:href="@{/imagePage/{hash}(hash=${previous.hash})}" style="float: left;">
             &lt; Назад
         </a>
 
-        <a th:if="${next != null}" th:href="@{/imagePage/{imHash}(imHash=${next.imHash})}" style="float: right;">
+        <a th:if="${next != null}" th:href="@{/imagePage/{hash}(hash=${next.hash})}" style="float: right;">
             Вперёд &gt;
         </a>
     </div>

@@ -5,6 +5,13 @@ spring:
     output:
         ansi:
             enabled: ALWAYS
+    datasource:
+        driverClassName: org.sqlite.JDBC
+        url: jdbc:sqlite:C:/Users/user/digikam4.db?open_mode=1
+        hikari:
+            read-only: true
+#            cache: shared
+
 logging:
     charset:
         console: 866
@@ -14,6 +21,7 @@ logging:
         com.example: TRACE
 
 filepaths:
+    dgkmRoot: E:\PHOTOS
     imageMagickHashFiles:
         E:\PHOTOS\Очень старые фотографии\очСтарImgHash 20230609.tsv,
         E:\PHOTOS\оцифрПлjpghash20230530.tsv,
@@ -21,9 +29,14 @@ filepaths:
     imageObjectsJson: C:\Users\user\imageObjects 20230609.json
     tagIdToNameFile: C:\Users\user\Documents\RelativesDates.txt
     thumbsDirectory: C:\users\user\thumbs\
-    whiteListDirectories: null
-    blackListDirectories: E:\PHOTOS\Старые фотографии\Виталик
+    whiteListDirectories: 
+    blackListDirectories: 
+        E:\PHOTOS\Старые фотографии\Виталик,
+        E:\PHOTOS\iphone
 
-#logging.level.org.springframework=DEBUG
-#logging.level.org.springframework.core.io=TRACE
-#logging.level.org.springframework.boot.context=TRACE
+# jdbc:
+#     driverClassName: org.sqlite.JDBC
+#     url: jdbc:sqlite:C:/Users/user/digikam4.db?readOnly=true
+
+
+  

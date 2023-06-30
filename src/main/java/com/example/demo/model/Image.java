@@ -13,6 +13,9 @@ public class Image {
     private Path thumbPath;
     private Set<String> tags;
 
+    public Image() {
+    }
+
     public Image(
             LocalDateTime creationDate,
             String fullName,
@@ -97,6 +100,7 @@ public class Image {
     public void setTags(Set<String> tags) {
         this.tags = tags;
     }
+
     public Path getThumbPath() {
         return thumbPath;
     }
@@ -105,12 +109,24 @@ public class Image {
         this.thumbPath = thumbPath;
     }
 
+    public String getHash() {
+        if (imHash != null) return imHash;
+        else if (dgkmHash != null) return dgkmHash;
+        else return null;
+    }
+
+    @Override
+    public String toString() {
+        return "Image [imHash=" + imHash + ", dgkmHash=" + dgkmHash + ", creationDate=" + creationDate + ", filePath="
+                + filePath + ", thumbPath=" + thumbPath + ", tags=" + tags + "]";
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((imHash == null) ? 0 : imHash.hashCode());
+        result = prime * result + ((dgkmHash == null) ? 0 : dgkmHash.hashCode());
         return result;
     }
 
@@ -127,6 +143,11 @@ public class Image {
             if (other.imHash != null)
                 return false;
         } else if (!imHash.equals(other.imHash))
+            return false;
+        if (dgkmHash == null) {
+            if (other.dgkmHash != null)
+                return false;
+        } else if (!dgkmHash.equals(other.dgkmHash))
             return false;
         return true;
     }

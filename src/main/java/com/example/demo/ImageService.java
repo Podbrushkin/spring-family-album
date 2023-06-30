@@ -75,8 +75,34 @@ public class ImageService {
         }
         return result;
     }
+    public Map<String, Image> getNextAndPreviousImages(Collection<String> tags, Optional<Integer> yearOpt,
+            Image img) {
+        var imageList = getAllImagesForTags(tags, yearOpt);
+        String providedImgHash = img.getImHash() == null ? img.getDgkmHash() : img.getImHash();
+        Map<String, Image> result = new HashMap<>();
+        for (int i = 0; i < imageList.size(); i++) {
+            String curHash = null;
 
-    public List<Image> getImagesForTagsOld(Collection<String> tags, String year, int page, int perPage) {
+            if (providedImgHash.length()==64) {
+                curHash = imageList.get(i).getImHash();
+            } else if (providedImgHash.length()==32) {
+                curHash = imageList.get(i).getDgkmHash();
+            }
+
+            if (curHash.equals(providedImgHash)) {
+                if (i != 0) {
+                    result.put("previous", imageList.get(i - 1));
+                }
+                if (i != imageList.size()-1) {
+                    result.put("next", imageList.get(i + 1));
+                }
+                break;
+            }
+        }
+        return result;
+    }
+
+    /* public List<Image> getImagesForTagsOld(Collection<String> tags, String year, int page, int perPage) {
 
         var imagesStream = catalog.getImageObjects()
                 .filter(img -> img.getTags().containsAll(tags))
@@ -87,5 +113,5 @@ public class ImageService {
                 .skip(perPage * (page - 1))
                 .limit(perPage)
                 .toList();
-    }
+    } */
 }

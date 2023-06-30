@@ -33,7 +33,7 @@ public class ImageProvider {
 
     }
 
-    public InputStream getImage(String imgHash) {
+    private InputStream getImage(String imgHash) {
         File imageFile = hashToPath.get(imgHash).toFile();
         try (InputStream is = new FileInputStream(imageFile)) {
             return is;
@@ -54,20 +54,23 @@ public class ImageProvider {
         }
         return null;
     }
+    public byte[] getImageBytes(Image img) {
+        return img.getDgkmHash() == null ? getImageBytes(img.getImHash()) :getImageBytes(img.getDgkmHash());
+    }
 
     public byte[] getThumbnailBytes(Image image) {
         // Path imageFile = dgkmHashToThumbPath.get(image.getDgkmHash());
         Path thumbFile = image.getThumbPath();
 
         if (thumbFile != null) {
-            log.trace("Found thumbnail for {}", image.getImHash());
+            log.trace("Found thumbnail for {}", image);
             try (InputStream is = new FileInputStream(thumbFile.toFile())) {
                 return is.readAllBytes();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.warn("Failed to read thumbnail: {}",thumbFile, e);
             }
         } else {
-            return getImageBytes(image.getImHash());
+            return getImageBytes(image);
         }
         return null;
     }

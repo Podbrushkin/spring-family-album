@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.example.demo.data.ImageRepositoryJdbc;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -38,6 +40,9 @@ public class MainController {
 	Catalog catalog;
 	@Autowired
 	ImageService imageService;
+
+	@Autowired
+	ImageRepositoryJdbc imageRepository;
 
 	@ModelAttribute("selectableTags")
 	public List<Tag> addSelectableTags() {
@@ -74,6 +79,7 @@ public class MainController {
 
 		// model.put("checkboxForm", new CheckboxForm());
 		log.info("index() was called");
+		model.addAttribute("imagesCount", imageRepository.getImagesCount());
 		return "index.html";
 	}
 
@@ -136,7 +142,7 @@ public class MainController {
 			HttpServletResponse response, HttpServletRequest request) throws IOException, NullPointerException {
 
 		response.setContentType("image/jpeg");
-		var imgObj = catalog.getImageForMgckHash(imgHash);
+		var imgObj = catalog.getImageForHash(imgHash);
 		byte[] image = imageProvider.getThumbnailBytes(imgObj);
 
 		response.setContentLength(image.length);
@@ -150,9 +156,9 @@ public class MainController {
 			@SessionAttribute List<String> selectedTags,
 			@SessionAttribute Optional<Integer> selectedYear,
 			ModelMap model) {
-		var img = catalog.getImageForMgckHash(imgHash);
+		var img = catalog.getImageForHash(imgHash);
 		model.addAttribute("image", img);
-		var prevAndNext = imageService.getNextAndPreviousImages(selectedTags, selectedYear, imgHash);
+		var prevAndNext = imageService.getNextAndPreviousImages(selectedTags, selectedYear, img);
 
 		model.put("previous", prevAndNext.get("previous"));
 		model.put("next", prevAndNext.get("next"));

@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -21,9 +22,12 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.data.ImageRepository;
 import com.example.demo.model.Image;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,35 +36,35 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 @Component
 public class Catalog {
     Logger log = LoggerFactory.getLogger(getClass());
-    private Path imageObjectsJson;
     private Path tagIdToNameFile;
     private Map<String, String> tagIdToNameMap;
     private Set<Image> imageObjects;
     private Map<String, Image> mgckHashToImageMap;
+    private Map<String, Image> dgkmHashToImageMap;
     private Set<String> tags;
     private Map<String, Path> imHashToPath;
     private Map<String, Path> dgkmHashToThumbPath;
 
     public Catalog(
-            @Value("${filepaths.imageObjectsJson}") String imageObjectsJsonStr,
+            ImageRepository imageRepository,
             @Value("${filepaths.tagIdToNameFile}") String tagIdToNameFileStr,
             @Value("${filepaths.imageMagickHashFiles}") String[] imHashFiles,
             @Value("${filepaths.thumbsDirectory}") String thumbsDirectory,
             @Value("${filepaths.whiteListDirectories}") String[] whiteListDirectories,
-            @Value("${filepaths.blackListDirectories}") String[] blackListDirectories
-            ) {
-        this.imageObjectsJson = Path.of(imageObjectsJsonStr);
+            @Value("${filepaths.blackListDirectories}") String[] blackListDirectories) {
+        imageObjects = imageRepository.getImages();
         this.tagIdToNameFile = Path.of(tagIdToNameFileStr);
-        log.trace("{} {}", imageObjectsJsonStr, tagIdToNameFileStr);
         tagIdToNameMap = readTagIdToNameMap(tagIdToNameFile);
-        imageObjects = readImageObjectsFromJson(imageObjectsJson);
+        // imageObjects = readImageObjectsFromJson(imageObjectsJson);
         mgckHashToImageMap = createMgckHashToImageMap();
+        dgkmHashToImageMap = createDgkmHashToImageMap();
         tags = getTags();
 
         this.imHashToPath = initHashToFilepath(imHashFiles);
+        this.imHashToPath.putAll(initDgkmHashToFilepath(imageObjects));
         this.dgkmHashToThumbPath = initDgkmHashToThumb(Path.of(thumbsDirectory));
         fillThumbPathFields(imageObjects, dgkmHashToThumbPath);
-        
+
         var whiteListDirs = Stream.of(whiteListDirectories).map(s -> Path.of(s)).collect(Collectors.toSet());
         var blackListDirs = Stream.of(blackListDirectories).map(s -> Path.of(s)).collect(Collectors.toSet());
         imageObjects = applyFilters(imageObjects, whiteListDirs, blackListDirs);
@@ -68,23 +72,46 @@ public class Catalog {
 
     private Set<Image> applyFilters(Collection<Image> imageObjects, Set<Path> whiteListDirs, Set<Path> blackListDirs) {
         int before = imageObjects.size();
+        logExtensionCounts(imageObjects);
+        int[] arr = new int[3];
         Set<Image> result = imageObjects.stream()
-        .filter(img -> {
-            var imgPath = img.getFilePath().toAbsolutePath();
-            var exists = Files.exists(imgPath);
-            boolean allowedByWhiteListedDirs = whiteListDirs.isEmpty()
-                 ? true 
-                 : whiteListDirs.stream()
-                    .anyMatch(p -> imgPath.startsWith(p));
-            boolean allowedByBlackListedDirs = blackListDirs.stream()
-                    .allMatch(p -> !imgPath.startsWith(p));
-            return exists && allowedByWhiteListedDirs && allowedByBlackListedDirs;
-        })
-        .collect(Collectors.toSet());
+                .filter(img -> {
+                    var imgPath = img.getFilePath().toAbsolutePath();
+                    if (!imgPath.getFileName().toString().toLowerCase().endsWith(".jpg")) {
+                        arr[0]++;
+                        return false;
+                    }
+                    // var exists = Files.exists(imgPath);
+                    var exists = true;
+                    boolean allowedByWhiteListedDirs = whiteListDirs.isEmpty()
+                            ? true
+                            : whiteListDirs.stream()
+                                    .anyMatch(p -> imgPath.startsWith(p));
+                    boolean allowedByBlackListedDirs = blackListDirs.stream()
+                            .allMatch(p -> !imgPath.startsWith(p));
+                    return exists && allowedByWhiteListedDirs && allowedByBlackListedDirs;
+                })
+                .collect(Collectors.toSet());
         int after = result.size();
+        log.debug("Images dismissed by extension: {}", arr[0]);
+        
         String msg = "By whiteListDirs({}) and blackListDirs({}) amount of images changed from {} to {}, by {}.";
-        log.debug(msg, whiteListDirs.size(), blackListDirs.size(), before, after, after-before);
+        log.debug(msg, whiteListDirs.size(), blackListDirs.size(), before, after, after - before);
+        logExtensionCounts(imageObjects);
         return result;
+    }
+
+    public void logExtensionCounts(Collection<Image> images) {
+        Map<String, Long> extensionCounts = images.stream()
+                .map(image -> getFileExtension(image.getFilePath()))
+                .collect(Collectors.groupingBy(extension -> extension, Collectors.counting()));
+        log.info("Extension counts: {}", extensionCounts);
+    }
+
+    private String getFileExtension(Path path) {
+        String fileName = path.getFileName().toString();
+        int dotIndex = fileName.lastIndexOf('.');
+        return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
     }
 
     private Map<String, Path> initHashToFilepath(String[] imHashFiles) {
@@ -104,6 +131,11 @@ public class Catalog {
             hashToPath.putAll(tsvToMap(tsvFile));
         }
         return hashToPath;
+    }
+
+    private Map<String, Path> initDgkmHashToFilepath(Collection<Image> images) {
+        return images.stream()
+                .collect(Collectors.toMap(Image::getDgkmHash, Image::getFilePath));
     }
 
     private Map<String, Path> initDgkmHashToThumb(Path thumbsDirectory) {
@@ -126,11 +158,34 @@ public class Catalog {
     }
 
     private Map<String, Image> createMgckHashToImageMap() {
-        return getImageObjects().collect(Collectors.toMap(Image::getImHash, img -> img));
+        return getImageObjects()
+                .filter(img -> img.getImHash() != null)
+                .collect(Collectors.toMap(Image::getImHash, img -> img));
     }
 
-    public Image getImageForMgckHash(String mgckHash) {
+    private Image getImageForMgckHash(String mgckHash) {
         return mgckHashToImageMap.get(mgckHash);
+    }
+
+    private Map<String, Image> createDgkmHashToImageMap() {
+        return getImageObjects()
+                .filter(img -> img.getDgkmHash() != null)
+                .collect(Collectors.toMap(Image::getDgkmHash, img -> img));
+    }
+
+    private Image getImageForDgkmHash(String dgkmHash) {
+        return dgkmHashToImageMap.get(dgkmHash);
+    }
+
+    public Image getImageForHash(String hash) {
+        if (hash.length() == 64) {
+            return getImageForMgckHash(hash);
+        } else if (hash.length() == 32) {
+            return getImageForDgkmHash(hash);
+        } else {
+            log.warn("Failed to find image for hash={}", hash);
+            return null;
+        }
     }
 
     public Map<Integer, Long> getNumberOfPhotosByYear() {
@@ -142,21 +197,6 @@ public class Catalog {
 
     public Stream<Image> getImageObjects() {
         return imageObjects.stream();
-    }
-
-    private Set<Image> readImageObjectsFromJson(Path imageObjectsJson) {
-        var objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new SimpleModule().addDeserializer(Image.class, new ImageDeserializer()));
-        Set<Image> imageObjects = null;
-        try {
-            imageObjects = objectMapper
-                    .readValue(imageObjectsJson.toFile(), new TypeReference<Set<Image>>() {
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        log.info("Found {} images.", imageObjects.size());
-        return imageObjects;
     }
 
     public Stream<Image> getImagesForTag(String tag) {
@@ -171,7 +211,7 @@ public class Catalog {
                     .flatMap(img -> img.getTags().stream())
                     .distinct()
                     .collect(Collectors.toSet());
-            log.info("Found {} unique tags.", tags.size());
+            log.info("Found {} unique tags from {} imageObjects.", tags.size(), imageObjects.size());
         }
         return tags;
     }
@@ -221,9 +261,10 @@ public class Catalog {
         return dgkmHashToThumbPath;
     }
 
-    private void fillThumbPathFields(Collection<Image> images, Map<String,Path> dgkmHashToThumbPath) {
+    private void fillThumbPathFields(Collection<Image> images, Map<String, Path> dgkmHashToThumbPath) {
         int thumbExists = 0, thumbNotExists = 0;
-        //var stats = new LinkedHashMap<String,Integer>(Map.of("thumbExists", 0, "thumbNotExists", 0));
+        // var stats = new LinkedHashMap<String,Integer>(Map.of("thumbExists", 0,
+        // "thumbNotExists", 0));
         for (var image : images) {
             Path thumbPath = dgkmHashToThumbPath.get(image.getDgkmHash());
             image.setThumbPath(thumbPath);
@@ -233,7 +274,7 @@ public class Catalog {
                 thumbExists++;
             }
         }
-        log.debug("Thumbnail paths provided/not_provided: {}/{}",thumbExists,thumbNotExists);
+        log.debug("Thumbnail paths provided/not_provided: {}/{}", thumbExists, thumbNotExists);
     }
 
 }

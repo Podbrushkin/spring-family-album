@@ -31,13 +31,15 @@
     <span th:each="tag : ${selectedTags}">
         <span th:text="${fullnames.get(tag)} + ','"></span>
     </span>
-    <span th:text="${selectedYear.isPresent() ? selectedYear.get() : 'любой'} + ' год. Найдено '+${totalImages}+' фотографий.'"></span>
+    <span th:if="${selectedYear != null}" th:text="${selectedYear.isPresent() ? selectedYear.get() : 'любой'} + ' год. Найдено '+${totalImages}+' фотографий.'"></span>
+    <span th:text="'imagesCount='+${imagesCount}"></span>
+
 
     <ul class="gallery">
         <li th:each="img : ${images}">
-            <a th:href="@{/imagePage/{img}(img=${img.imHash})}">
+            <a th:href="@{/imagePage/{img}(img=${img.hash})}">
                 <div class="gallery-item">
-                    <img th:src="@{/thumbnail/{img}(img=${img.imHash})}"
+                    <img th:src="@{/thumbnail/{img}(img=${img.hash})}"
                         th:title="${img.creationDate} +'&#10;'+ ${img.filePath}">
                 </div>
             </a>
