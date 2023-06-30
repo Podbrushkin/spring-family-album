@@ -53,6 +53,7 @@ public class MainController {
 			tags.add(new Tag(s, catalog.getTagNameExtended(s), imagesCount));
 		});
 		tags.sort(Comparator.comparing(t -> t.getName()));
+		log.trace("Adding {} selectableTags to model...",tags.size());
 		return tags;
 	}
 
@@ -69,6 +70,7 @@ public class MainController {
 	@ModelAttribute("fullnames")
 	public Map<String,String> addFullnames(ModelMap model) {
 	List<Tag> selectableTags = (List<Tag>) model.getAttribute("selectableTags");
+	log.trace("selectableTags.size: {}",selectableTags.size());
 		var map = selectableTags.stream()
 				.collect(Collectors.toMap(Tag::getId, Tag::getName));
 		return map;

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -23,39 +24,38 @@ public class ImageProvider {
     @Autowired
     private Catalog catalog;
     private Map<String, Path> hashToPath; // = catalog.getImHashToPathMap();
-    private Map<String, Path> dgkmHashToThumbPath; // = catalog.getDgkmHashToThumbPathMap();
+
+    private Map<String, byte[]> imageDataCache = new LinkedHashMap<String, byte[]>(16, 0.75f, true) {
+        protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
+            return size() > 200;
+        }
+    };
 
     @PostConstruct
-    
     private void init() {
         hashToPath = catalog.getImHashToPathMap();
-        dgkmHashToThumbPath = catalog.getDgkmHashToThumbPathMap();
+        // dgkmHashToThumbPath = catalog.getDgkmHashToThumbPathMap();
 
     }
 
-    private InputStream getImage(String imgHash) {
-        File imageFile = hashToPath.get(imgHash).toFile();
-        try (InputStream is = new FileInputStream(imageFile)) {
-            return is;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public byte[] getImageBytes(String imgHash) {
+    synchronized public byte[] getImageBytes(String imgHash) {
         log.trace("Asked image for imghash=" + imgHash);
 
-        File imageFile = hashToPath.get(imgHash).toFile();
-        try (InputStream is = new FileInputStream(imageFile)) {
-            return is.readAllBytes();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return imageDataCache.computeIfAbsent(imgHash, hash -> {
+            File imageFile = hashToPath.get(hash).toFile();
+            try (InputStream is = new FileInputStream(imageFile)) {
+                log.trace("reading from disk...");
+                return is.readAllBytes();
+
+            } catch (IOException e) {
+                log.warn("Failed to read image from disk: ", e);
+            }
+            return null;
+        });
     }
+
     public byte[] getImageBytes(Image img) {
-        return img.getDgkmHash() == null ? getImageBytes(img.getImHash()) :getImageBytes(img.getDgkmHash());
+        return img.getDgkmHash() == null ? getImageBytes(img.getImHash()) : getImageBytes(img.getDgkmHash());
     }
 
     public byte[] getThumbnailBytes(Image image) {
@@ -67,7 +67,7 @@ public class ImageProvider {
             try (InputStream is = new FileInputStream(thumbFile.toFile())) {
                 return is.readAllBytes();
             } catch (IOException e) {
-                log.warn("Failed to read thumbnail: {}",thumbFile, e);
+                log.warn("Failed to read thumbnail: {}", thumbFile, e);
             }
         } else {
             return getImageBytes(image);
