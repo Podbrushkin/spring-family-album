@@ -35,8 +35,9 @@
     <br><br>
     <h2>Люди на фотографии:</h2>
     <ul>
-        <li th:each="person : ${image.tags}">
-            <a th:href="@{/processForm(tag=${person})}" th:text="${fullnames.get(person)}"></a>
+        <li th:each="tag : ${imgTagObjs}">
+            <!-- <a th:href="@{/processForm(tag=${person})}" th:text="${fullnames.get(person)}"></a> -->
+            <a th:href="@{/processForm(tag=${tag.id})}" th:text="${tag.name}"></a>
         </li>
     </ul>
 </body>

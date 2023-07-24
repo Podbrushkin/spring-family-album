@@ -7,13 +7,15 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,16 +24,12 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.data.ImageRepository;
 import com.example.demo.model.Image;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.example.demo.model.Tag;
 
 @Component
 public class Catalog {
@@ -205,6 +203,23 @@ public class Catalog {
                 .filter(img -> img.getTags().contains(tag));
     }
 
+    public List<Image> getImagesForTags(Collection<String> tags, Optional<Integer> yearOpt) {
+
+        List<Image> imageList = this.getImageObjects()
+                .filter(img -> img.getTags().containsAll(tags))
+                .filter(img -> {
+                    return (yearOpt.isPresent()) ? ((Integer) img.getCreationDate().getYear()).equals(yearOpt.get())
+                            : true;
+                })
+                .toList();
+
+        int totalItems = imageList.size();
+        // imageList.sort(Comparator.comparing(Image::getCreationDate));
+        return imageList;
+    }
+
+
+
     public Set<String> getTags() {
         if (tags == null) {
             tags = imageObjects.stream()
@@ -214,6 +229,49 @@ public class Catalog {
             log.info("Found {} unique tags from {} imageObjects.", tags.size(), imageObjects.size());
         }
         return tags;
+    }
+
+
+    /*
+     * A collection of tagged images implies there is a set of tags which you can choose,
+     * this method returns this tags with additional info.
+     */
+    private List<Tag> selectableTags = null;
+    public List<Tag> getSelectableTagObjs() {
+        if (selectableTags == null) {
+            log.trace("Calculating selectable tags...");
+            List<Tag> tags = new ArrayList<Tag>();
+            this.getTags().forEach(s -> {
+                var imageList = this.getImagesForTags(List.of(s), Optional.empty());
+                long imagesCount = imageList.size();
+                tags.add(new Tag(s, this.getTagNameExtended(s), imagesCount));
+            });
+            tags.sort(Comparator.comparing(t -> t.getName()));
+            this.selectableTags = tags;
+            log.trace("{} selectableTags have been found.", tags.size());
+        }
+		return selectableTags;
+	}
+    public List<Tag> getTagObjs(List<String> tagIds) {
+        /* tagId -> {
+            this.getSelectableTagObjs().stream().filter(t -> t.getName().equals(tagId));
+        } 
+        tagId -> {
+            return
+                this.getSelectableTagObjs().stream().filter(t -> t.getName().equals(tagId)).findFirst();
+        }
+        */
+        return 
+        tagIds.stream()
+        .map(tagId -> {
+            return
+                this.getSelectableTagObjs()
+                .stream()
+                .filter(t -> t.getId().equals(tagId))
+                .findFirst()
+                .orElse(null);
+        })
+        .toList();
     }
 
     public String getTagNameExtended(String tagId) {
@@ -234,6 +292,7 @@ public class Catalog {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        log.trace("{} tag extended names have been read from tsv file.", tagIdToNameMap.size());
         return tagIdToNameMap;
     }
 

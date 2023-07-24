@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Image;
+import com.example.demo.model.Page;
 
 @Service
 public class ImageService {
@@ -20,17 +21,9 @@ public class ImageService {
     @Autowired
     Catalog catalog;
 
-    public Page<Image> getImagesForTags(Collection<String> tags, Optional<Integer> yearOpt, int page, int perPage) {
+    public Page<Image> getImagesForTagsPageable(Collection<String> tags, Optional<Integer> yearOpt, int page, int perPage) {
 
-        List<Image> imageList = catalog.getImageObjects()
-                .filter(img -> img.getTags().containsAll(tags))
-                // .filter(img -> (year.isBlank()) ? true : (img.getCreationDate().getYear() +
-                // "").equals(year))
-                .filter(img -> {
-                    return (yearOpt.isPresent()) ? ((Integer) img.getCreationDate().getYear()).equals(yearOpt.get())
-                            : true;
-                })
-                .toList();
+        List<Image> imageList = catalog.getImagesForTags(tags, yearOpt);
 
         int totalItems = imageList.size();
         imageList = imageList.stream()

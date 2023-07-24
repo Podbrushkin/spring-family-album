@@ -28,11 +28,11 @@
         </div>
     </form>
    
-    <span th:each="tag : ${selectedTags}">
+    <!-- <span th:each="tag : ${selectedTags}">
         <span th:text="${fullnames.get(tag)} + ','"></span>
     </span>
     <span th:if="${selectedYear != null}" th:text="${selectedYear.isPresent() ? selectedYear.get() : 'любой'} + ' год. Найдено '+${totalImages}+' фотографий.'"></span>
-    <span th:text="'imagesCount='+${imagesCount}"></span>
+    <span th:text="'imagesCount='+${imagesCount}"></span> -->
 
 
     <ul class="gallery">

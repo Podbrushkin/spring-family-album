@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.example.demo.data.ImageRepositoryJdbc;
+import com.example.demo.model.Tag;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,15 +47,7 @@ public class MainController {
 
 	@ModelAttribute("selectableTags")
 	public List<Tag> addSelectableTags() {
-		List<Tag> tags = new ArrayList<Tag>();
-		catalog.getTags().forEach(s -> {
-			var imagePage = imageService.getImagesForTags(List.of(s), Optional.empty(), 1, 1);
-			long imagesCount = imagePage.getTotalItems();
-			tags.add(new Tag(s, catalog.getTagNameExtended(s), imagesCount));
-		});
-		tags.sort(Comparator.comparing(t -> t.getName()));
-		log.trace("Adding {} selectableTags to model...",tags.size());
-		return tags;
+		return catalog.getSelectableTagObjs();
 	}
 
 	@ModelAttribute("selectableYears")
@@ -67,14 +60,14 @@ public class MainController {
 		selectableYears.sort(Comparator.comparing(t -> t.getName()));
 		return selectableYears;
 	}
-	@ModelAttribute("fullnames")
+	/* @ModelAttribute("fullnames")
 	public Map<String,String> addFullnames(ModelMap model) {
 	List<Tag> selectableTags = (List<Tag>) model.getAttribute("selectableTags");
 	log.trace("selectableTags.size: {}",selectableTags.size());
 		var map = selectableTags.stream()
 				.collect(Collectors.toMap(Tag::getId, Tag::getName));
 		return map;
-	}
+	} */
 
 	@GetMapping(value = "/")
 	public String index(ModelMap model) {
@@ -114,7 +107,7 @@ public class MainController {
 			pageSize = (int) session.getAttribute("pageSize");
 		}
 		
-		var imagePage = imageService.getImagesForTags(selectedTags, selectedYear, page, pageSize);
+		var imagePage = imageService.getImagesForTagsPageable(selectedTags, selectedYear, page, pageSize);
 		model.put("images", imagePage.getItems());
 		model.addAttribute("currentPage", page);
 		model.addAttribute("pageSize", pageSize);
@@ -161,56 +154,13 @@ public class MainController {
 		var img = catalog.getImageForHash(imgHash);
 		model.addAttribute("image", img);
 		var prevAndNext = imageService.getNextAndPreviousImages(selectedTags, selectedYear, img);
-
+		var imgTagObjs = catalog.getTagObjs(img.getTags().stream().toList());
+		log.trace("Tag objs of currently shown image: {}",imgTagObjs);
+		model.put("imgTagObjs", imgTagObjs);
 		model.put("previous", prevAndNext.get("previous"));
 		model.put("next", prevAndNext.get("next"));
 
 		return "image.html";
-	}
-
-	class Tag {
-		String id;
-		String name;
-		int imagesCount;
-
-		public Tag(String id) {
-			this.id = id;
-		}
-
-		public Tag(String id, String name, Long imagesCount) {
-			this.id = id;
-			if (name != null) {
-				this.name = name;
-			} else {
-				this.name = id;
-			}
-			this.imagesCount = imagesCount.intValue();
-		}
-
-		public String getId() {
-			return id;
-		}
-
-		public void setId(String id) {
-			this.id = id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public void setImagesCount(int imagesCount) {
-			this.imagesCount = imagesCount;
-		}
-
-		public int getImagesCount() {
-			return imagesCount;
-		}
-
 	}
 
 }
