@@ -2,14 +2,12 @@ package com.example.demo.data;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.model.Image;
@@ -18,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @Repository
-// @Lazy
+@ConditionalOnProperty(name={"jdbc.driverClassName","jdbc.url"}, matchIfMissing=true, havingValue="value_that_never_appears")
 public class ImageRepositoryJson implements ImageRepository {
     Logger log = LoggerFactory.getLogger(getClass());
     Set<Image> images;

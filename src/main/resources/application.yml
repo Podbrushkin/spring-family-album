@@ -1,16 +1,9 @@
-# spring.mandatory-file-encoding=UTF-8
 spring:
     thymeleaf:
         cache: false
     output:
         ansi:
             enabled: ALWAYS
-    datasource:
-        driverClassName: org.sqlite.JDBC
-        url: jdbc:sqlite:C:/Users/user/digikam4.db?open_mode=1
-        hikari:
-            read-only: true
-#            cache: shared
 
 logging:
     charset:
@@ -36,7 +29,7 @@ filepaths:
 
 # jdbc:
 #     driverClassName: org.sqlite.JDBC
-#     url: jdbc:sqlite:C:/Users/user/digikam4.db?readOnly=true
+#     url: jdbc:sqlite:C:/Users/user/digikam4.db
 
 
   

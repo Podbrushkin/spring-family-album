@@ -7,14 +7,15 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.model.Image;
 
 @Repository
-@Primary
+// @Primary
+@ConditionalOnProperty({"jdbc.driverClassName","jdbc.url"})
 public class ImageRepositoryJdbc implements ImageRepository {
     Logger log = LoggerFactory.getLogger(getClass());
     private final JdbcTemplate jdbcTemplate;
