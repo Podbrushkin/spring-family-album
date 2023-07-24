@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.example.demo.data.ImageRepositoryJdbc;
 import com.example.demo.model.Tag;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,9 +40,6 @@ public class MainController {
 	@Autowired
 	ImageService imageService;
 
-	@Autowired
-	ImageRepositoryJdbc imageRepository;
-
 	@ModelAttribute("selectableTags")
 	public List<Tag> addSelectableTags() {
 		return catalog.getSelectableTagObjs();
@@ -60,21 +55,13 @@ public class MainController {
 		selectableYears.sort(Comparator.comparing(t -> t.getName()));
 		return selectableYears;
 	}
-	/* @ModelAttribute("fullnames")
-	public Map<String,String> addFullnames(ModelMap model) {
-	List<Tag> selectableTags = (List<Tag>) model.getAttribute("selectableTags");
-	log.trace("selectableTags.size: {}",selectableTags.size());
-		var map = selectableTags.stream()
-				.collect(Collectors.toMap(Tag::getId, Tag::getName));
-		return map;
-	} */
 
 	@GetMapping(value = "/")
 	public String index(ModelMap model) {
 
 		// model.put("checkboxForm", new CheckboxForm());
 		log.info("index() was called");
-		model.addAttribute("imagesCount", imageRepository.getImagesCount());
+		model.addAttribute("imagesCount", catalog.getImageObjects().count());
 		return "index.html";
 	}
 
