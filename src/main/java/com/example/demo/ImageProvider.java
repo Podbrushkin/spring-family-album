@@ -40,9 +40,11 @@ public class ImageProvider {
 
     synchronized public byte[] getImageBytes(String imgHash) {
         log.trace("Asked image for imghash=" + imgHash);
-
+        var img = catalog.getImageForHash(imgHash);
         return imageDataCache.computeIfAbsent(imgHash, hash -> {
-            File imageFile = hashToPath.get(hash).toFile();
+            // File imageFile = hashToPath.get(hash).toFile();
+            File imageFile = img.getFilePath().toFile();
+
             try (InputStream is = new FileInputStream(imageFile)) {
                 log.trace("reading from disk...");
                 return is.readAllBytes();
