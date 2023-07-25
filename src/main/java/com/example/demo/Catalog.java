@@ -41,18 +41,21 @@ public class Catalog {
     private Map<String, Image> dgkmHashToImageMap;
     private Set<String> tags;
     private Map<String, Path> imHashToPath;
-    private Map<String, Path> dgkmHashToThumbPath;
+    private Map<String, Path> dgkmHashToThumbPath = new HashMap<>();
 
     public Catalog(
             ImageRepository imageRepository,
-            @Value("${filepaths.tagIdToNameFile}") String tagIdToNameFileStr,
-            @Value("${filepaths.imageMagickHashFiles}") String[] imHashFiles,
-            @Value("${filepaths.thumbsDirectory}") String thumbsDirectory,
-            @Value("${filepaths.whiteListDirectories}") String[] whiteListDirectories,
-            @Value("${filepaths.blackListDirectories}") String[] blackListDirectories) {
+            @Value("${filepaths.tagIdToNameFile:#{null}}") String tagIdToNameFileStr,
+            @Value("${filepaths.imageMagickHashFiles:#{null}}") String[] imHashFiles,
+            @Value("${filepaths.thumbsDirectory:#{null}}") String thumbsDirectory,
+            @Value("${filepaths.whiteListDirectories:#{null}}") String[] whiteListDirectories,
+            @Value("${filepaths.blackListDirectories:#{null}}") String[] blackListDirectories) {
         imageObjects = imageRepository.getImages();
-        this.tagIdToNameFile = Path.of(tagIdToNameFileStr);
-        tagIdToNameMap = readTagIdToNameMap(tagIdToNameFile);
+        // if (tagIdToNameFileStr != null) {
+        this.tagIdToNameFile = tagIdToNameFileStr == null ? null : Path.of(tagIdToNameFileStr);
+        this.tagIdToNameMap = readTagIdToNameMap(tagIdToNameFile);
+        
+        
         // imageObjects = readImageObjectsFromJson(imageObjectsJson);
         mgckHashToImageMap = createMgckHashToImageMap();
         dgkmHashToImageMap = createDgkmHashToImageMap();
@@ -60,15 +63,23 @@ public class Catalog {
 
         this.imHashToPath = initHashToFilepath(imHashFiles);
         this.imHashToPath.putAll(initDgkmHashToFilepath(imageObjects));
-        this.dgkmHashToThumbPath = initDgkmHashToThumb(Path.of(thumbsDirectory));
-        fillThumbPathFields(imageObjects, dgkmHashToThumbPath);
-
+        log.trace("imHashToPath.size(): {}",imHashToPath.size());
+        if (thumbsDirectory != null) {
+            this.dgkmHashToThumbPath = initDgkmHashToThumb(Path.of(thumbsDirectory));
+            fillThumbPathFields(imageObjects, dgkmHashToThumbPath);
+        }
+        
+        whiteListDirectories = whiteListDirectories == null ? new String[0] : whiteListDirectories;
+        blackListDirectories = blackListDirectories == null ? new String[0] : blackListDirectories;
         var whiteListDirs = Stream.of(whiteListDirectories).map(s -> Path.of(s)).collect(Collectors.toSet());
         var blackListDirs = Stream.of(blackListDirectories).map(s -> Path.of(s)).collect(Collectors.toSet());
         imageObjects = applyFilters(imageObjects, whiteListDirs, blackListDirs);
     }
 
     private Set<Image> applyFilters(Collection<Image> imageObjects, Set<Path> whiteListDirs, Set<Path> blackListDirs) {
+        final var whiteListDirsSafe = whiteListDirs == null ? new HashSet<Path>() : whiteListDirs;
+        final var blackListDirsSafe = blackListDirs == null ? new HashSet<Path>() : blackListDirs;
+
         int before = imageObjects.size();
         logExtensionCounts(imageObjects);
         int[] arr = new int[3];
@@ -81,11 +92,11 @@ public class Catalog {
                     }
                     // var exists = Files.exists(imgPath);
                     var exists = true;
-                    boolean allowedByWhiteListedDirs = whiteListDirs.isEmpty()
+                    boolean allowedByWhiteListedDirs = whiteListDirsSafe.isEmpty()
                             ? true
-                            : whiteListDirs.stream()
+                            : whiteListDirsSafe.stream()
                                     .anyMatch(p -> imgPath.startsWith(p));
-                    boolean allowedByBlackListedDirs = blackListDirs.stream()
+                    boolean allowedByBlackListedDirs = blackListDirsSafe.stream()
                             .allMatch(p -> !imgPath.startsWith(p));
                     return exists && allowedByWhiteListedDirs && allowedByBlackListedDirs;
                 })
@@ -93,8 +104,8 @@ public class Catalog {
         int after = result.size();
         log.debug("Images dismissed by extension: {}", arr[0]);
         
-        String msg = "By whiteListDirs({}) and blackListDirs({}) amount of images changed from {} to {}, by {}.";
-        log.debug(msg, whiteListDirs.size(), blackListDirs.size(), before, after, after - before);
+        String msg = "By whiteListDirs({}) and blackListDirs({}) and extension amount of images changed from {} to {}, by {}.";
+        log.debug(msg, whiteListDirsSafe.size(), blackListDirsSafe.size(), before, after, after - before);
         logExtensionCounts(imageObjects);
         return result;
     }
@@ -113,8 +124,11 @@ public class Catalog {
     }
 
     private Map<String, Path> initHashToFilepath(String[] imHashFiles) {
-        log.trace("Найдено {} paths to files with imageMagick hashes.", imHashFiles.length);
+        var numOfFiles = imHashFiles == null ? 0 : imHashFiles.length;
+        log.trace("Найдено {} paths to files with imageMagick hashes.", numOfFiles);
         Map<String, Path> hashToPath = new HashMap<>();
+        if (numOfFiles == 0) {return hashToPath;}
+
         Set<Path> tsvFiles = new HashSet<Path>();
 
         for (var filePath : imHashFiles) {
@@ -280,7 +294,7 @@ public class Catalog {
 
     private Map<String, String> readTagIdToNameMap(Path tagIdToNameFile) {
         var tagIdToNameMap = new HashMap<String, String>();
-
+        if (tagIdToNameFile == null) return tagIdToNameMap;
         try {
             Files.lines(tagIdToNameFile, Charset.forName("UTF-8"))
                     .skip(1)

@@ -15,7 +15,7 @@ import com.example.demo.model.Image;
 
 @Repository
 // @Primary
-@ConditionalOnProperty({"jdbc.driverClassName","jdbc.url"})
+@ConditionalOnProperty({"jdbc.driverClassName","jdbc.url","filepaths.dgkmRoot"})
 public class ImageRepositoryJdbc implements ImageRepository {
     Logger log = LoggerFactory.getLogger(getClass());
     private final JdbcTemplate jdbcTemplate;

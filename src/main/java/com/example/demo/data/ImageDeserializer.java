@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.model.Image;
@@ -33,6 +34,10 @@ public class ImageDeserializer extends JsonDeserializer<Image> {
         String creationDateStr = node.get("creationDate").asText();
         LocalDateTime creationDate = dateParser.parseDateTime(creationDateStr);
         String fullName = node.get("fullName").asText();
+        if (fullName.contains("classpath:")) {
+            fullName = fullName.replace("classpath:", "").replace("\\", "/");
+            fullName = new ClassPathResource(fullName).getFile().toPath().toString();
+        }
 
         Set<String> tags = new HashSet<>();
 

@@ -24,10 +24,10 @@ public class ImageRepositoryJson implements ImageRepository {
     Path imageObjectsJson;
 
     ImageRepositoryJson(
-        @Value("${filepaths.imageObjectsJson}") String imageObjectsJsonStr,
+        @Value("${filepaths.imageObjectsJson}") Path imageObjectsJson,
         ImageDeserializer imageDeserializer
     ) {
-        imageObjectsJson = Path.of(imageObjectsJsonStr);
+        this.imageObjectsJson = imageObjectsJson;
         this.imageDeserializer = imageDeserializer;
     }
 

@@ -11,12 +11,14 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.model.Image;
 
 @Component
+@ConditionalOnBean(ImageRepositoryJdbc.class)
 class ImageResultSetExtractor implements ResultSetExtractor<Map<String, Image>> {
     Logger log = LoggerFactory.getLogger(getClass());
     @Value("${filepaths.dgkmRoot}")

@@ -1,0 +1,113 @@
+[
+  {
+    "fullName": "classpath:sampleData\\John 4017414.jpg",
+    "imgId": "4017414",
+    "uniqueHash": "HxlwggVOBBhwcESxCBJ2FpYOFwj8Dl8G",
+    "imageHash": "aQ05ZYnuq0YepNlGPYGRQ6FJeiTsUd576gTTPJ2HFPKr8IteJbnPl93bYv9OLgPv",
+    "tags": [
+      "John"
+    ],
+    "creationDate": "2021-05-27T20:28:19.781"
+  },
+  {
+    "fullName": "classpath:sampleData\\Kate 4017428.jpg",
+    "imgId": "4017428",
+    "uniqueHash": "LhnLoSnB33wcLdch0fuK1JXYkkmhstrx",
+    "imageHash": "w2PoWk7pzJh92eInyA4cUB76aPoMba4uZ594jyoGiRPFBQsl9d52ieqN2UbveJRT",
+    "tags": [
+      "Kate"
+    ],
+    "creationDate": "1995-06-01T20:36:07.307"
+  },
+  {
+    "fullName": "classpath:sampleData\\Maria 4017435.jpg",
+    "imgId": "4017435",
+    "uniqueHash": "Ul4LkSDIhFCB6jp3BGsp1UHvp5tYufde",
+    "imageHash": "PdGbsb0iWdKUS9tFFOpEZVEdZ7g7GAvRRUiQMlrBvGEtnCDY12u87Vno36Y3lxuF",
+    "tags": [
+      "Maria"
+    ],
+    "creationDate": "1997-06-18T07:26:27.268"
+  },
+  {
+    "fullName": "classpath:sampleData\\Maria John 4017422.jpg",
+    "imgId": "4017422",
+    "uniqueHash": "DUjNLz3GxiU3JcO3Xq1axAQnnld4PAQL",
+    "imageHash": "WtPQLeAyOkqh9c5EUrLf5YPpdi2PKtZKj44ObHuaMIxX9xsoDbuiGNf6bJa0Klw2",
+    "tags": [
+      "Maria",
+      "John"
+    ],
+    "creationDate": "1994-05-26T12:32:09.831"
+  },
+  {
+    "fullName": "classpath:sampleData\\Maria Kate 3985239.jpg",
+    "imgId": "3985239",
+    "uniqueHash": "8nB6oEkbOEz2TJxqPHVX08fn3xIZDkbu",
+    "imageHash": "7BgkIKXHZRoHuf6EwCU09X8fWkV5BOsPFx1PmQejM13JLWIepVIV7MbIuCcxwiVY",
+    "tags": [
+      "Maria",
+      "Kate"
+    ],
+    "creationDate": "2004-06-26T10:26:16.783"
+  },
+  {
+    "fullName": "classpath:sampleData\\Maria Kate 3985282.jpg",
+    "imgId": "3985282",
+    "uniqueHash": "akj7lHROBsrjdbqvDUSBCoRlKW5PmPV8",
+    "imageHash": "Qm265jbXV6Csuo078ENhbvaIoBOaNZ8qccWUYNsFm3w2IffSIt7NRVIGcoZ5ambF",
+    "tags": [
+      "Maria",
+      "Kate"
+    ],
+    "creationDate": "1996-11-01T00:37:20.046"
+  },
+  {
+    "fullName": "classpath:sampleData\\Maria Kate John 4017426.jpg",
+    "imgId": "4017426",
+    "uniqueHash": "ZketRwcs6tzfA7lLA8Aso17iqJyx2lRT",
+    "imageHash": "DruDONJClac00kYk2Z6K7PLIgwqf7xmh83QvYnwErSygsjuBvdHT6VeLrV0HWN2U",
+    "tags": [
+      "Maria",
+      "Kate",
+      "John"
+    ],
+    "creationDate": "2014-07-06T19:30:47.930"
+  },
+  {
+    "fullName": "classpath:sampleData\\Maria Kate Peter John 4017408.jpg",
+    "imgId": "4017408",
+    "uniqueHash": "nOem1K9tXQFWIe2Ikmbj1vG7JUF1XvbJ",
+    "imageHash": "W3vbgNnpJZd7mNxN5UVHQq6a8EN1NiHlAZAEx7r8FqvEwvQkNdAu3r86yGeRD7cB",
+    "tags": [
+      "Maria",
+      "Kate",
+      "Peter",
+      "John"
+    ],
+    "creationDate": "2015-11-18T13:55:50.025"
+  },
+  {
+    "fullName": "classpath:sampleData\\Maria Kate Peter John 4017415.jpg",
+    "imgId": "4017415",
+    "uniqueHash": "3R3fbGJHaNmELHa7MXHci1gDb2peHxdq",
+    "imageHash": "Gag6OXa12Db1BzSuKJdSMdJbz524XkxsMB5iKjlYUZxO7UkjhhYOAgUnbktlHYDW",
+    "tags": [
+      "Maria",
+      "Kate",
+      "Peter",
+      "John"
+    ],
+    "creationDate": "1995-01-17T15:05:07.915"
+  },
+  {
+    "fullName": "classpath:sampleData\\Peter 4017437.jpg",
+    "imgId": "4017437",
+    "uniqueHash": "KIWZmiI3X2odVfQbMw8yavkLCbA85SHj",
+    "imageHash": "7yP7n1hpz6c0KZ2pV0KPT7zVmduPQuJIgREPkz9Q8JUFJqEBdgVFJ7QEhIRt8SrJ",
+    "tags": [
+      "Peter"
+    ],
+    "creationDate": "2005-07-27T08:32:46.217"
+  }
+]
