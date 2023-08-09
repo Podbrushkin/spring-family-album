@@ -15,15 +15,13 @@ import org.springframework.stereotype.Component;
 
 import com.example.demo.model.Image;
 
-import jakarta.annotation.PostConstruct;
-
 @Component
 public class ImageProvider {
     Logger log = LoggerFactory.getLogger(ImageProvider.class);
 
     @Autowired
     private Catalog catalog;
-    private Map<String, Path> hashToPath; // = catalog.getImHashToPathMap();
+    // private Map<String, Path> hashToPath; = catalog.getImHashToPathMap();
 
     private Map<String, byte[]> imageDataCache = new LinkedHashMap<String, byte[]>(16, 0.75f, true) {
         protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
@@ -31,12 +29,12 @@ public class ImageProvider {
         }
     };
 
-    @PostConstruct
+    /* @PostConstruct
     private void init() {
         hashToPath = catalog.getImHashToPathMap();
         // dgkmHashToThumbPath = catalog.getDgkmHashToThumbPathMap();
 
-    }
+    } */
 
     synchronized public byte[] getImageBytes(String imgHash) {
         log.trace("Asked image for imghash=" + imgHash);

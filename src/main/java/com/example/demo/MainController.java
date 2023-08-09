@@ -2,6 +2,7 @@ package com.example.demo;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.example.demo.model.PersonDto;
 import com.example.demo.model.Tag;
+import com.example.demo.service.ImageService;
+import com.example.demo.service.PersonService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,10 +43,17 @@ public class MainController {
 	Catalog catalog;
 	@Autowired
 	ImageService imageService;
+	@Autowired
+	PersonService personService;
 
 	@ModelAttribute("selectableTags")
 	public List<Tag> addSelectableTags() {
 		return catalog.getSelectableTagObjs();
+	}
+
+	@ModelAttribute("allDepictedPeople")
+	public Collection<PersonDto> addAllDepictedPeople() {
+		return personService.findAllDepictedWithCountsDto();
 	}
 
 	@ModelAttribute("selectableYears")

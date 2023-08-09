@@ -2,6 +2,8 @@ package com.example.demo;
 
 import javax.sql.DataSource;
 
+import org.neo4j.cypherdsl.core.renderer.Configuration;
+import org.neo4j.cypherdsl.core.renderer.Dialect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,8 +11,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 
 @SpringBootApplication
+@EnableNeo4jRepositories
 public class DemoApplication {
 	Logger log = LoggerFactory.getLogger(getClass());
 	public static void main(String[] args) {
@@ -36,6 +40,11 @@ public class DemoApplication {
                 .url("jdbc:sqlite:memory:mockDb")
                 .build();
 		}
+	}
+
+	@Bean
+	public Configuration cypherDslConfiguration() {
+		return Configuration.newConfig().withDialect(Dialect.NEO4J_5).build();
 	}
 
 }

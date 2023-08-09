@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.service;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -12,18 +12,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.data.ImageRepositoryNeo4j;
+
 import com.example.demo.model.Image;
 import com.example.demo.model.Page;
 
 @Service
 public class ImageService {
     Logger log = LoggerFactory.getLogger(getClass());
+    // @Autowired
+    // Catalog catalog;
     @Autowired
-    Catalog catalog;
+    PersonService personService;
+    @Autowired
+    ImageRepositoryNeo4j imageRepositoryNeo4j;
 
     public Page<Image> getImagesForTagsPageable(Collection<String> tags, Optional<Integer> yearOpt, int page, int perPage) {
 
-        List<Image> imageList = catalog.getImagesForTags(tags, yearOpt);
+        List<Image> imageList = this.getAllImagesForTags(tags, yearOpt);
 
         int totalItems = imageList.size();
         imageList = imageList.stream()
@@ -37,7 +43,27 @@ public class ImageService {
     }
 
     public List<Image> getAllImagesForTags(Collection<String> tags, Optional<Integer> yearOpt) {
-        List<Image> imageList = catalog.getImageObjects()
+        // var personsDepicted = personService.getPersonsForTags(tags);
+        // var personsDepicted = 
+        var imageList = 
+            imageRepositoryNeo4j.findByTagsContainsAll(tags);
+            // imageRepositoryNeo4j.findByPeopleDepictedContainsAll(personsDepicted);
+        if (yearOpt.isPresent()) {
+            imageList =
+            imageList.stream()
+            .filter(img -> {
+                if (yearOpt.isPresent()) {
+                    return 
+                        ((Integer) img.getCreationDate().getYear()).equals(yearOpt.get());
+                } else 
+                    return true;
+            })
+            .toList();
+        }
+        return imageList;
+
+        // return catalog.getImagesForTags(tags, yearOpt);
+        /* List<Image> imageList = catalog.getImageObjects()
                 .filter(img -> img.getTags().containsAll(tags))
                 // .filter(img -> (year.isBlank()) ? true : (img.getCreationDate().getYear() +
                 // "").equals(year))
@@ -47,7 +73,7 @@ public class ImageService {
                 })
                 .sorted(Comparator.comparing(Image::getCreationDate))
                 .toList();
-        return imageList;
+        return imageList; */
     }
 
     public Map<String, Image> getNextAndPreviousImages(Collection<String> tags, Optional<Integer> yearOpt,
@@ -107,4 +133,6 @@ public class ImageService {
                 .limit(perPage)
                 .toList();
     } */
+
+    
 }

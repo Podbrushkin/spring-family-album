@@ -2,16 +2,47 @@ package com.example.demo.model;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
+import org.springframework.data.neo4j.core.schema.Id;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
+import org.springframework.data.neo4j.core.schema.Relationship.Direction;
+
+@Node("Image")
 public class Image {
+
+    @Id
+    @GeneratedValue
+    String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     private String imHash;
     private String dgkmHash;
     private LocalDateTime creationDate;
-    private Path filePath;
-    private Path thumbPath;
+    private String filePath;
+    private String thumbPath;
     private Set<String> tags;
+
+    @Relationship(type = "DEPICTS", direction = Direction.OUTGOING)
+    private Set<Person> people  = new HashSet<>();
+
+    public Set<Person> getPeople() {
+        return people;
+    }
+
+    public void setPeople(Set<Person> people) {
+        this.people = people;
+    }
 
     public Image() {
     }
@@ -22,7 +53,7 @@ public class Image {
             String imHash) {
 
         this.creationDate = creationDate;
-        this.filePath = Path.of(fullName);
+        this.filePath = fullName;
         this.imHash = imHash;
     }
 
@@ -33,7 +64,7 @@ public class Image {
             Set<String> tags) {
 
         this.creationDate = creationDate;
-        this.filePath = Path.of(fullName);
+        this.filePath = fullName;
         this.imHash = imHash;
         this.tags = tags;
     }
@@ -46,7 +77,7 @@ public class Image {
             Set<String> tags) {
 
         this.creationDate = creationDate;
-        this.filePath = Path.of(fullName);
+        this.filePath = fullName;
         this.imHash = imHash;
         this.dgkmHash = dgkmHash;
         this.tags = tags;
@@ -70,11 +101,11 @@ public class Image {
     }
 
     public Path getFilePath() {
-        return filePath;
+        return Path.of(filePath);
     }
 
     public void setFilePath(Path filePath) {
-        this.filePath = filePath;
+        this.filePath = filePath.toString();
     }
 
     public void setImHash(String hash) {
@@ -102,17 +133,21 @@ public class Image {
     }
 
     public Path getThumbPath() {
-        return thumbPath;
+        return (thumbPath == null) ? null : Path.of(thumbPath);
     }
 
     public void setThumbPath(Path thumbPath) {
-        this.thumbPath = thumbPath;
+        if (thumbPath != null)
+            this.thumbPath = thumbPath.toString();
     }
 
     public String getHash() {
-        if (imHash != null) return imHash;
-        else if (dgkmHash != null) return dgkmHash;
-        else return null;
+        if (imHash != null)
+            return imHash;
+        else if (dgkmHash != null)
+            return dgkmHash;
+        else
+            return null;
     }
 
     @Override
