@@ -141,7 +141,7 @@ public class Image {
             this.thumbPath = thumbPath.toString();
     }
 
-    public String getHash() {
+    public String getAnyHash() {
         if (imHash != null)
             return imHash;
         else if (dgkmHash != null)

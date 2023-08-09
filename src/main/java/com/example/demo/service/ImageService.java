@@ -1,11 +1,13 @@
 package com.example.demo.service;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +22,15 @@ import com.example.demo.model.Page;
 @Service
 public class ImageService {
     Logger log = LoggerFactory.getLogger(getClass());
-    // @Autowired
-    // Catalog catalog;
     @Autowired
     PersonService personService;
     @Autowired
     ImageRepositoryNeo4j imageRepositoryNeo4j;
+    Comparator<Image> imgComparator = Comparator.comparing(Image::getCreationDate);
+
+    public Image getImageForHash(String hash) {
+        return imageRepositoryNeo4j.findOneByImHashOrDgkmHash(hash, hash);
+    }
 
     public Page<Image> getImagesForTagsPageable(Collection<String> tags, Optional<Integer> yearOpt, int page, int perPage) {
 
@@ -33,21 +38,18 @@ public class ImageService {
 
         int totalItems = imageList.size();
         imageList = imageList.stream()
-                .sorted(Comparator.comparing(Image::getCreationDate))
                 .skip(perPage * (page - 1))
                 .limit(perPage)
-                .toList();
+                .collect(Collectors.toList());
 
         int totalPages = (int) Math.ceil((double) totalItems / perPage);
         return new Page<Image>(imageList, page, totalPages, totalItems);
     }
 
     public List<Image> getAllImagesForTags(Collection<String> tags, Optional<Integer> yearOpt) {
-        // var personsDepicted = personService.getPersonsForTags(tags);
-        // var personsDepicted = 
         var imageList = 
             imageRepositoryNeo4j.findByTagsContainsAll(tags);
-            // imageRepositoryNeo4j.findByPeopleDepictedContainsAll(personsDepicted);
+        Collections.sort(imageList, imgComparator);
         if (yearOpt.isPresent()) {
             imageList =
             imageList.stream()
@@ -58,55 +60,18 @@ public class ImageService {
                 } else 
                     return true;
             })
-            .toList();
+            .collect(Collectors.toList());
         }
         return imageList;
-
-        // return catalog.getImagesForTags(tags, yearOpt);
-        /* List<Image> imageList = catalog.getImageObjects()
-                .filter(img -> img.getTags().containsAll(tags))
-                // .filter(img -> (year.isBlank()) ? true : (img.getCreationDate().getYear() +
-                // "").equals(year))
-                .filter(img -> {
-                    return (yearOpt.isPresent()) ? ((Integer) img.getCreationDate().getYear()).equals(yearOpt.get())
-                            : true;
-                })
-                .sorted(Comparator.comparing(Image::getCreationDate))
-                .toList();
-        return imageList; */
     }
 
-    public Map<String, Image> getNextAndPreviousImages(Collection<String> tags, Optional<Integer> yearOpt,
-            String curImageImHash) {
-        var imageList = getAllImagesForTags(tags, yearOpt);
-        Map<String, Image> result = new HashMap<>();
-        for (int i = 0; i < imageList.size(); i++) {
-            var curHash = imageList.get(i).getImHash();
-            if (curHash.equals(curImageImHash)) {
-                if (i != 0) {
-                    result.put("previous", imageList.get(i - 1));
-                }
-                if (i != imageList.size()-1) {
-                    result.put("next", imageList.get(i + 1));
-                }
-                break;
-            }
-        }
-        return result;
-    }
     public Map<String, Image> getNextAndPreviousImages(Collection<String> tags, Optional<Integer> yearOpt,
             Image img) {
         var imageList = getAllImagesForTags(tags, yearOpt);
-        String providedImgHash = img.getImHash() == null ? img.getDgkmHash() : img.getImHash();
+        String providedImgHash = img.getAnyHash();
         Map<String, Image> result = new HashMap<>();
         for (int i = 0; i < imageList.size(); i++) {
-            String curHash = null;
-
-            if (providedImgHash.length()==64) {
-                curHash = imageList.get(i).getImHash();
-            } else if (providedImgHash.length()==32) {
-                curHash = imageList.get(i).getDgkmHash();
-            }
+            String curHash = imageList.get(i).getAnyHash();
 
             if (curHash.equals(providedImgHash)) {
                 if (i != 0) {
@@ -118,21 +83,7 @@ public class ImageService {
                 break;
             }
         }
+        log.trace("Found prev and next images for {}: {}",img.getFilePath(), result);
         return result;
     }
-
-    /* public List<Image> getImagesForTagsOld(Collection<String> tags, String year, int page, int perPage) {
-
-        var imagesStream = catalog.getImageObjects()
-                .filter(img -> img.getTags().containsAll(tags))
-                .filter(img -> (year.isBlank()) ? true : (img.getCreationDate().getYear() + "").equals(year));
-
-        return imagesStream
-                .sorted(Comparator.comparing(Image::getCreationDate))
-                .skip(perPage * (page - 1))
-                .limit(perPage)
-                .toList();
-    } */
-
-    
 }

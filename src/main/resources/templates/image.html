@@ -21,21 +21,21 @@
     <div class="button-container">
         <a href="/search?goBack=true">&lt; Галерея</a>
     </div>
-    <img th:src="@{'/image/' + ${image.hash}}" th:alt="${image.hash}" />
+    <img th:src="@{'/image/' + ${image.anyHash}}" th:alt="${image.anyHash}" />
 
     <div class="button-container">
-        <a th:if="${previous != null}" th:href="@{/imagePage/{hash}(hash=${previous.hash})}" style="float: left;">
+        <a th:if="${previous != null}" th:href="@{/imagePage/{hash}(hash=${previous.anyHash})}" style="float: left;">
             &lt; Назад
         </a>
 
-        <a th:if="${next != null}" th:href="@{/imagePage/{hash}(hash=${next.hash})}" style="float: right;">
+        <a th:if="${next != null}" th:href="@{/imagePage/{hash}(hash=${next.anyHash})}" style="float: right;">
             Вперёд &gt;
         </a>
     </div>
     <br><br>
     <h2>Люди на фотографии:</h2>
     <ul>
-        <li th:each="tag : ${imgTagObjs}">
+        <li th:each="tag : ${image.people}">
             <!-- <a th:href="@{/processForm(tag=${person})}" th:text="${fullnames.get(person)}"></a> -->
             <a th:href="@{/processForm(tag=${tag.id})}" th:text="${tag.name}"></a>
         </li>

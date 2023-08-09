@@ -14,13 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.model.Image;
+import com.example.demo.service.ImageService;
 
 @Component
 public class ImageProvider {
     Logger log = LoggerFactory.getLogger(ImageProvider.class);
 
     @Autowired
-    private Catalog catalog;
+    private ImageService imageService;
     // private Map<String, Path> hashToPath; = catalog.getImHashToPathMap();
 
     private Map<String, byte[]> imageDataCache = new LinkedHashMap<String, byte[]>(16, 0.75f, true) {
@@ -38,7 +39,7 @@ public class ImageProvider {
 
     synchronized public byte[] getImageBytes(String imgHash) {
         log.trace("Asked image for imghash=" + imgHash);
-        var img = catalog.getImageForHash(imgHash);
+        var img = imageService.getImageForHash(imgHash);
         return imageDataCache.computeIfAbsent(imgHash, hash -> {
             // File imageFile = hashToPath.get(hash).toFile();
             File imageFile = img.getFilePath().toFile();

@@ -46,11 +46,6 @@ public class MainController {
 	@Autowired
 	PersonService personService;
 
-	@ModelAttribute("selectableTags")
-	public List<Tag> addSelectableTags() {
-		return catalog.getSelectableTagObjs();
-	}
-
 	@ModelAttribute("allDepictedPeople")
 	public Collection<PersonDto> addAllDepictedPeople() {
 		return personService.findAllDepictedWithCountsDto();
@@ -135,7 +130,7 @@ public class MainController {
 			HttpServletResponse response, HttpServletRequest request) throws IOException, NullPointerException {
 
 		response.setContentType("image/jpeg");
-		var imgObj = catalog.getImageForHash(imgHash);
+		var imgObj = imageService.getImageForHash(imgHash);
 		byte[] image = imageProvider.getThumbnailBytes(imgObj);
 
 		response.setContentLength(image.length);
@@ -149,12 +144,10 @@ public class MainController {
 			@SessionAttribute List<String> selectedTags,
 			@SessionAttribute Optional<Integer> selectedYear,
 			ModelMap model) {
-		var img = catalog.getImageForHash(imgHash);
+		var img = imageService.getImageForHash(imgHash);
 		model.addAttribute("image", img);
+
 		var prevAndNext = imageService.getNextAndPreviousImages(selectedTags, selectedYear, img);
-		var imgTagObjs = catalog.getTagObjs(img.getTags().stream().toList());
-		log.trace("Tag objs of currently shown image: {}",imgTagObjs);
-		model.put("imgTagObjs", imgTagObjs);
 		model.put("previous", prevAndNext.get("previous"));
 		model.put("next", prevAndNext.get("next"));
 

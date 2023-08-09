@@ -8,25 +8,6 @@
 <body>
     <div class="button-container" >
         <a href="/" style="background-color:grey;">Домой</a></div>
-    
-    <!-- <form th:action="@{/processForm}" method="get" class="checkboxForm">
-        <div style="columns: 3; column-gap: 20px;">
-            <div th:each="tag, iter : ${selectableTags}">
-                <input type="checkbox" name="tag" th:value="${tag.id}"
-                    th:id="'checkbox-'+${iter.index}" />
-                <label th:text="${tag.name}+' ('+${tag.imagesCount}+')'" th:for="'checkbox-'+${iter.index}"></label>
-            </div>
-        </div>
-        <br />
-        <select name="selectedYear">
-            <option value="">Год</option>
-            <option th:each="tag : ${selectableYears}" th:value="${tag.id}"
-                th:text="${tag.name}+' ('+${tag.imagesCount}+')'"></option>
-        </select>
-        <div class="button-container">
-            <button type="submit">Показать</button>
-        </div>
-    </form> -->
 
     <form th:action="@{/processForm}" method="get" class="checkboxForm">
         <div style="columns: 3; column-gap: 20px;">
@@ -56,9 +37,9 @@
 
     <ul class="gallery">
         <li th:each="img : ${images}">
-            <a th:href="@{/imagePage/{img}(img=${img.hash})}">
+            <a th:href="@{/imagePage/{img}(img=${img.anyHash})}">
                 <div class="gallery-item">
-                    <img th:src="@{/thumbnail/{img}(img=${img.hash})}"
+                    <img th:src="@{/thumbnail/{img}(img=${img.anyHash})}"
                         th:title="${img.creationDate} +'&#10;'+ ${img.filePath}">
                 </div>
             </a>
