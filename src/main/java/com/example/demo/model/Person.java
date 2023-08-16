@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -75,6 +76,17 @@ public class Person {
     }
     public void setName(String name) {
         this.name = name;
+    }
+    public String getFirstName() {
+        String[] tokens = getName().split(" ");
+        String name =
+        Arrays.stream(tokens)
+            .filter(s -> !s.contains("("))
+            .skip(1)
+            .limit(1)
+            .findAny()
+            .orElse(getName());
+        return name;
     }
 
     @Override

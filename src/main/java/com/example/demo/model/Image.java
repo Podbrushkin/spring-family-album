@@ -35,6 +35,9 @@ public class Image {
 
     @Relationship(type = "DEPICTS", direction = Direction.OUTGOING)
     private Set<Person> people  = new HashSet<>();
+    
+    @Relationship(type = "COMMENTED", direction = Direction.INCOMING)
+    private Set<Comment> comments;
 
     public Set<Person> getPeople() {
         return people;
@@ -148,6 +151,14 @@ public class Image {
             return dgkmHash;
         else
             return null;
+    }
+
+    public Set<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(Set<Comment> comments) {
+        this.comments = comments;
     }
 
     @Override

@@ -5,15 +5,7 @@
     <meta charset="UTF-8">
     <title>Image Viewer</title>
     <link rel="stylesheet" media="screen" th:href="@{~/styles.css}" />
-    <style>
-        img {
-            max-width: 100%;
-            max-height: 100vh;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-    </style>
+    
 </head>
 
 <body>
@@ -21,7 +13,7 @@
     <div class="button-container">
         <a href="/search?goBack=true">&lt; Галерея</a>
     </div>
-    <img th:src="@{'/image/' + ${image.anyHash}}" th:alt="${image.anyHash}" />
+    <img id="imgSingle" th:src="@{'/image/' + ${image.anyHash}}" th:alt="${image.anyHash}" />
 
     <div class="button-container">
         <a th:if="${previous != null}" th:href="@{/imagePage/{hash}(hash=${previous.anyHash})}" style="float: left;">
@@ -38,6 +30,16 @@
         <li th:each="tag : ${image.people}">
             <!-- <a th:href="@{/processForm(tag=${person})}" th:text="${fullnames.get(person)}"></a> -->
             <a th:href="@{/processForm(tag=${tag.id})}" th:text="${tag.name}"></a>
+        </li>
+    </ul>
+    <h2>Комментарии:</h2>
+    <ul class="messagesList">
+        <li th:each="cmnt : ${image.comments}">
+            <!-- <a th:href="@{/processForm(tag=${person})}" th:text="${fullnames.get(person)}"></a> -->
+            <!-- <p th:text="${cmnt.text}"></p> -->
+            <span th:utext="|<b>${cmnt.author.firstName}</b>: |"></span>
+            <span id="date" th:text="${#temporals.format(cmnt.creationDate, 'yyyy-MM-dd HH:mm')}"></span>
+            <span th:text="${cmnt.text}"></span>
         </li>
     </ul>
 </body>

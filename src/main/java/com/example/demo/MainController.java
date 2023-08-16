@@ -86,8 +86,8 @@ public class MainController {
 
 	@GetMapping(value = "/search")
 	public String processQueryParams(
-			@SessionAttribute List<String> selectedTags,
-			@SessionAttribute Optional<Integer> selectedYear,
+			@SessionAttribute(required = false) List<String> selectedTags,
+			@SessionAttribute(required = false) Optional<Integer> selectedYear,
 			@RequestParam(name = "page", defaultValue = "1") int page,
 			@RequestParam(name = "pageSize", defaultValue = "40") int pageSize,
 			@RequestParam(name = "goBack", defaultValue = "false") boolean goBack,
@@ -95,7 +95,9 @@ public class MainController {
 			HttpSession session) {
 		log.trace("SessionAttrs: tags={}, year={}", selectedTags, selectedYear);
 
-		if (goBack) {
+		if (selectedTags == null) {
+			return "redirect:/";
+		} else if (goBack) {
 			page = (int) session.getAttribute("currentPage");
 			pageSize = (int) session.getAttribute("pageSize");
 		}
