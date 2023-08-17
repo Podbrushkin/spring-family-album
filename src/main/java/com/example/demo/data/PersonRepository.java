@@ -18,7 +18,7 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
 
     List<Person> findAllByBirthdayIn(Collection<LocalDate> birthdays);
 
-    List<Person> findAllByNameIn(Collection<String> names);
+    List<Person> findAllByFullNameIn(Collection<String> names);
 
     @Query("MATCH (:Image)-[:DEPICTS]->(person:Person) RETURN DISTINCT person")
     List<Person> findAllDepictedByAtLeastOneImage();
@@ -34,6 +34,5 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
         RETURN count(i)
         """)
     public Integer countImagesForPersonId(@Param("personId") String personId);
-
     // public Integer countImagesByPerson(Person person);
 }

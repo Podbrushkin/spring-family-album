@@ -1,0 +1,85 @@
+package com.example.demo.graphviz;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+class PersonDot {
+    private static Logger log = Logger.getLogger(PersonDot.class.getName());
+    String dotId;
+    String label;
+    
+
+    private LocalDate birthday;
+
+    
+
+    List<PersonDot> children = new ArrayList<PersonDot>();
+    PersonDot spouse;
+
+    private PersonDot(String dotId, String label) {
+        this.dotId = dotId;
+        this.label = label;
+    }
+    static PersonDot of(String name, String label) {
+        log.finest(String.format("PersonDot created: %s %s",name,label));
+        if ((label == null) && (!name.matches("(?i)[\\w\\d]+"))) {
+            return new PersonDot(null,name);
+        } else
+        if ((name != null) &&(name.matches("(?i)[\\w\\d]+"))) {
+            return new PersonDot(name, label);
+        }
+        else {
+            var msg = String.format("Wrong data to create PersonDot: %s %s",name,label);
+            throw new IllegalStateException(msg);
+        }
+    }
+    public String getDotId() {
+        return dotId;
+    }
+    public String getFullname() {
+        int endOfFullname = this.label.indexOf("\\n");
+        if (endOfFullname == -1) endOfFullname = this.label.length();
+        var fullname = this.label.substring(0, endOfFullname);
+        return fullname;
+    }
+    public String getLabel() {
+        return label;
+    }
+    
+
+    public LocalDate getBirthday() {
+        if (this.birthday != null) return birthday;
+
+        Pattern p = Pattern.compile(".*\\\\n(\\d{2})\\.(\\d{2}).(\\d{4}).*");
+        Matcher m = p.matcher(this.label);
+
+        if (m.matches()) {
+            this.birthday = LocalDate.parse(m.group(3)+"-"+m.group(2)+"-"+m.group(1));
+        } 
+        return birthday;
+    }
+    
+    void fillDataIfNotAlready(String name, String label) {
+        if ((this.dotId == null) && (name != null))
+            this.dotId = name;
+        if ((this.label == null) && (label != null))
+            this.label = label;
+    }
+
+    @Override
+    public String toString() {
+        var childrenShort = children.stream()
+            .map(p -> p.label)
+            .collect(
+                Collectors.joining (", ")
+            );
+        var bday = this.getBirthday() == null ? "" : " bday="+birthday+", ";
+        return 
+            String.format("PersonDot[dotId=%s, label=%s,%s children=(%s)]",this.dotId, this.label, bday, childrenShort);
+    }
+}

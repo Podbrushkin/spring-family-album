@@ -29,7 +29,7 @@
     <ul>
         <li th:each="tag : ${image.people}">
             <!-- <a th:href="@{/processForm(tag=${person})}" th:text="${fullnames.get(person)}"></a> -->
-            <a th:href="@{/processForm(tag=${tag.id})}" th:text="${tag.name}"></a>
+            <a th:href="@{/processForm(tag=${tag.birthdayOrFullName})}" th:text="${tag.fullName}"></a>
         </li>
     </ul>
     <h2>Комментарии:</h2>

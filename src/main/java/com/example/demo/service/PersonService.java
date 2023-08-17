@@ -3,6 +3,8 @@ package com.example.demo.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -40,7 +42,7 @@ public class PersonService {
                 .filter(t -> !t.matches("\\d{4}-\\d{2}-\\d{2}"))
                 .toList();
 
-        persons.addAll(personRepository.findAllByNameIn(nameTags));
+        persons.addAll(personRepository.findAllByFullNameIn(nameTags));
         log.trace("Found {} persons for tags: {}.", persons.size(), tags);
         return persons;
     }
@@ -67,12 +69,13 @@ public class PersonService {
         for (var person : persons) {
             var dto = new PersonDto(person);
             // var imagesCount = personRepository.countImagesForPersonId(person.getId());
-            var imagesCount = imageRepositoryNeo4j.countByPeopleContains(person.getId());
+            var imagesCount = imageRepositoryNeo4j.countByPeopleContains(person.getDotId());
             log.trace("{} is depicted in {} images.",person, imagesCount);
             dto.setImagesCount(imagesCount);
             dtos.add(dto);
         }
         this.allDepictedWithCountsDto = dtos;
+        Collections.sort(dtos, Comparator.comparing(p -> p.getFullName()));
         return dtos;
         // var persons = findAllDepictedByAtLeastOneImage();
         // Map<Person,Integer> map = countImagesForPersons(persons);

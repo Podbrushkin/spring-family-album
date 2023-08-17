@@ -17,6 +17,7 @@ logging:
         console: "%clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
     level:
         com.example: TRACE
+        com.example.graphviz: INFO
 
 filepaths:
     dgkmRoot: E:\PHOTOS
@@ -27,10 +28,11 @@ filepaths:
     # imageObjectsJson: C:\Users\user\imageObjects 20230609.json
     # imageObjectsJson: classpath:sampleData\imageObjs.json
     tagIdToNameFile: C:\Users\user\Documents\RelativesDates.txt
+    graphvizTree: C:\Users\user\Documents\FamilyTree Photos.txt
     thumbsDirectory: C:\users\user\thumbs\
     whiteListDirectories:
-        E:\PHOTOS\Очень старые фотографии
-        # E:\PHOTOS\Очень старые фотографии\скан2021
+        # E:\PHOTOS\Очень старые фотографии
+        E:\PHOTOS\Очень старые фотографии\скан2021
     blackListDirectories: 
         E:\PHOTOS\Старые фотографии\Виталик,
         E:\PHOTOS\iphone

@@ -47,6 +47,7 @@ public interface ImageRepositoryNeo4j extends Neo4jRepository<Image, String> {
             all(x IN i.tags WHERE x IN $tags)
         RETURN i
         """) */
+    // what if Person doesn't have bday nor dotId?
     @Query("""
         MATCH (p:Person)
         WHERE 
@@ -54,7 +55,7 @@ public interface ImageRepositoryNeo4j extends Neo4jRepository<Image, String> {
             AND
             toString(p.birthday) IN $tags)
             OR
-            p.dotId IN $tags
+            p.fullName IN $tags
         WITH collect(p) AS people
         MATCH (i:Image)-[:DEPICTS]->(p)
         WHERE ALL(p IN people WHERE (i)-[:DEPICTS]->(p))

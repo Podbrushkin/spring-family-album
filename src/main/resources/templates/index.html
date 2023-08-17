@@ -12,9 +12,9 @@
     <form th:action="@{/processForm}" method="get" class="checkboxForm">
         <div style="columns: 3; column-gap: 20px;">
             <div th:each="tag, iter : ${allDepictedPeople}">
-                <input type="checkbox" name="tag" th:value="${tag.birthday != null} ? ${tag.birthday} : ${tag.id}"
+                <input type="checkbox" name="tag" th:value="${tag.birthdayOrFullName}"
                     th:id="'checkbox-'+${iter.index}" />
-                <label th:text="${tag.name}+' ('+${tag.imagesCount}+')'" th:for="'checkbox-'+${iter.index}"></label>
+                <label th:text="${tag.fullName}+' ('+${tag.imagesCount}+')'" th:for="'checkbox-'+${iter.index}"></label>
             </div>
         </div>
         <br />

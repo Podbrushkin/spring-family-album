@@ -29,7 +29,7 @@ public class PersonController {
     @GetMapping("/names")
     List<String> getPersonsNames() {
         var people = personRepository.findAll();
-        List<String> names = people.stream().map(Person::getName).collect(Collectors.toList());
+        List<String> names = people.stream().map(Person::getFullName).collect(Collectors.toList());
         return names;
     }
 

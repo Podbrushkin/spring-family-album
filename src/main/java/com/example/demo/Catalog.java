@@ -9,8 +9,10 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -23,11 +25,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.comparator.Comparators;
 
 import com.example.demo.data.ImageRepository;
 import com.example.demo.data.ImageRepositoryNeo4j;
 import com.example.demo.data.PersonRepository;
+import com.example.demo.graphviz.GraphvizProcessor;
 import com.example.demo.model.Image;
+import com.example.demo.model.Person;
 import com.example.demo.service.ImageService;
 
 @Component
@@ -44,7 +49,9 @@ public class Catalog {
             ImageRepositoryNeo4j imageRepositoryNeo4j,
             PersonRepository personRepository,
             ImageService imageService,
+            GraphvizProcessor graphvizProc,
             @Value("${filepaths.tagIdToNameFile:#{null}}") String tagIdToNameFileStr,
+            @Value("${filepaths.graphvizTree:#{null}}") String graphvizTree,
             @Value("${filepaths.imageMagickHashFiles:#{null}}") String[] imHashFiles,
             @Value("${filepaths.thumbsDirectory:#{null}}") String thumbsDirectory,
             @Value("${filepaths.whiteListDirectories:#{null}}") String[] whiteListDirectories,
@@ -78,15 +85,50 @@ public class Catalog {
         var blackListDirs = Stream.of(blackListDirectories).map(s -> Path.of(s)).collect(Collectors.toSet());
         imageObjects = applyFilters(imageObjects, whiteListDirs, blackListDirs);
         
-        log.trace("Persisting objects...");
+        log.trace("Persisting Image objects...");
         var imgObjs = imageRepositoryNeo4j.saveAll(imageObjects);
         log.trace("imgObjs.size() {}",imgObjs.size());
 
-        createImageDepictsPersonRels(imageRepositoryNeo4j, personRepository);
-        
-        var image = imgObjs.get(0);
-        log.trace("Example of img with tagged person: {}",image.getPeople());
+        if (graphvizTree != null) {
+            var graphvizTreePath = Path.of(graphvizTree);
+            if (Files.exists(graphvizTreePath)) {
+                try {
+                    var dot = Files.readString(graphvizTreePath);
+                    removeAllPersonsFromDbAndAddNewFromGraphviz(personRepository, graphvizProc, dot);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
+        createImageDepictsPersonRels(imageRepositoryNeo4j, personRepository);
+    }
+
+    private void removeAllPersonsFromDbAndAddNewFromGraphviz(PersonRepository personRepositoryNeo4j, GraphvizProcessor gp, String dot) {
+        personRepositoryNeo4j.deleteAll();
+        var peop = gp.getPeople(dot);
+        log.info("Graphviz file provided {} people.",peop.size());
+        var s = peop.stream()
+            .sorted(
+                Comparator.comparing(p -> p.getFullName(), 
+                    Comparator.nullsFirst(Comparator.naturalOrder()))
+                )
+        .map(p -> p.getFullName()).collect(Collectors.joining("\n"));
+        log.info(s);
+        var before = personRepositoryNeo4j.count();
+        log.trace("Going to persist all created Person objects...");
+        personRepositoryNeo4j.saveAll(peop);
+        /* for (var p : peop) {
+            log.trace("Saving {}...",p);
+            personRepositoryNeo4j.save(p);
+        } */
+        /* var x = new Person("xxx","pupkin");
+        var y = new Person("yyy","lupkin");
+        x.getChildren().add(y);
+        personRepositoryNeo4j.saveAll(List.of(x,y)); */
+
+        var after = personRepositoryNeo4j.count();
+        log.info("Amount of people in database changed from {} to {}.",before, after);
     }
 
     private Integer createImageDepictsPersonRels(ImageRepositoryNeo4j imageRepositoryNeo4j, PersonRepository personRepository) {
@@ -126,7 +168,7 @@ public class Catalog {
         var nameTags = tagsAll.stream()
                 .filter(t -> !t.matches("\\d{4}-\\d{2}-\\d{2}"))
                 .collect(Collectors.toSet());
-        persons = personRepository.findAllByNameIn(nameTags);
+        persons = personRepository.findAllByFullNameIn(nameTags);
         if (nameTags.size() == persons.size()) {
             log.trace("For every name tag a person was found.");
         } else {
@@ -135,7 +177,7 @@ public class Catalog {
             
             var namesFromPersons =
                 persons.stream()
-                .map(p -> p.getName())
+                .map(p -> p.getFullName())
                 .collect(Collectors.toSet());
 
             var namesWithoutPerson = nameTags.stream()

@@ -3,19 +3,19 @@ package com.example.demo.model;
 public class PersonDto {
     
     private String id;
-    private String name;
+    private String fullName;
     private String birthday;
     private Integer imagesCount;
 
-    public PersonDto(String id, String name, String birthday, Integer imagesCount) {
+    private PersonDto(String id, String name, String birthday, Integer imagesCount) {
         this.id = id;
-        this.name = name;
+        this.fullName = name;
         this.birthday = birthday;
         this.imagesCount = imagesCount;
     }
     public PersonDto(Person person) {
-        this.id = person.getId();
-        this.name = person.getName();
+        this.id = person.getDotId();
+        this.fullName = person.getFullName();
         if (person.getBirthday() != null)
             this.birthday = person.getBirthday().toString();
     }
@@ -26,17 +26,20 @@ public class PersonDto {
     public void setId(String id) {
         this.id = id;
     }
-    public String getName() {
-        return name;
+    public String getFullName() {
+        return fullName;
     }
-    public void setName(String name) {
-        this.name = name;
+    public void setFullName(String name) {
+        this.fullName = name;
     }
     public String getBirthday() {
         return birthday;
     }
     public void setBirthday(String birthday) {
         this.birthday = birthday;
+    }
+    public String getBirthdayOrFullName() {
+        return birthday == null ? this.fullName : this.birthday.toString();
     }
     public Integer getImagesCount() {
         return imagesCount;
