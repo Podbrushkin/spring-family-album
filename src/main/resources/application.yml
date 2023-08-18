@@ -19,28 +19,31 @@ logging:
     level:
         com.example: TRACE
         com.example.graphviz: INFO
+        com.example.demo.ImageProvider: INFO
+        com.example.demo.service.PersonService: INFO
 
 filepaths:
-    dgkmRoot: E:\PHOTOS
-    imageMagickHashFiles:
-        E:\PHOTOS\Очень старые фотографии\очСтарImgHash 20230609.tsv,
-        E:\PHOTOS\оцифрПлjpghash20230530.tsv,
-        E:\PHOTOS\oldphjpghashlen20230211.tsv
+    # dgkmRoot: E:\PHOTOS
+    # imageMagickHashFiles:
+    #     E:\PHOTOS\Очень старые фотографии\очСтарImgHash 20230609.tsv,
+    #     E:\PHOTOS\оцифрПлjpghash20230530.tsv,
+    #     E:\PHOTOS\oldphjpghashlen20230211.tsv
     # imageObjectsJson: C:\Users\user\imageObjects 20230609.json
-    # imageObjectsJson: classpath:sampleData\imageObjs.json
-    tagIdToNameFile: C:\Users\user\Documents\RelativesDates.txt
-    graphvizTree: C:\Users\user\Documents\FamilyTree Photos.txt
+    imageObjectsJson: classpath:sampleData\imageObjs.json
+    # tagIdToNameFile: C:\Users\user\Documents\RelativesDates.txt
+    # graphvizTree: C:\Users\user\Documents\FamilyTree Photos.txt
+    graphvizTree: classpath:sampleData\familyTree.dot
     thumbsDirectory: C:\users\user\thumbs\
-    whiteListDirectories:
-        E:\PHOTOS\Очень старые фотографии
+    # whiteListDirectories:
+    #     E:\PHOTOS\Очень старые фотографии
         # E:\PHOTOS\Очень старые фотографии\скан2021
-    blackListDirectories: 
-        E:\PHOTOS\Старые фотографии\Виталик,
-        E:\PHOTOS\iphone
+    # blackListDirectories: 
+    #     E:\PHOTOS\Старые фотографии\Виталик,
+        # E:\PHOTOS\iphone
 
-jdbc:
-    driverClassName: org.sqlite.JDBC
-    url: jdbc:sqlite:C:/Users/user/digikam4.db
+# jdbc:
+#     driverClassName: org.sqlite.JDBC
+#     url: jdbc:sqlite:C:/Users/user/digikam4.db
 
 
   

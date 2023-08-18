@@ -16,7 +16,7 @@ public interface ImageRepositoryNeo4j extends Neo4jRepository<Image, String> {
             WHERE 
                 toString(p.birthday) IN i.tags
             OR 
-                p.name IN i.tags
+                p.fullName IN i.tags
             MERGE (i)-[:DEPICTS]->(p)
             RETURN count(*)
             """)
@@ -71,10 +71,10 @@ public interface ImageRepositoryNeo4j extends Neo4jRepository<Image, String> {
     public Map<Person,Integer> countImagesForPersons(@Param("persons") Collection<Person> persons); */
     
     @Query("""
-        MATCH (i:Image) -[:DEPICTS] -> (p:Person {dotId: $person})
+        MATCH (i:Image) -[:DEPICTS] -> (p:Person {fullName: $person})
         RETURN count(i)
         """)
-    public Integer countByPeopleContains(@Param("person") String personId);
+    public Integer countByPeopleContains(@Param("person") String personFullName);
 
     @Query("""
         MATCH (i:Image) -[r:DEPICTS] -> (p:Person)

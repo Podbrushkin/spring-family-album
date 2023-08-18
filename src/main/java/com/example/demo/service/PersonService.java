@@ -69,7 +69,7 @@ public class PersonService {
         for (var person : persons) {
             var dto = new PersonDto(person);
             // var imagesCount = personRepository.countImagesForPersonId(person.getId());
-            var imagesCount = imageRepositoryNeo4j.countByPeopleContains(person.getDotId());
+            var imagesCount = imageRepositoryNeo4j.countByPeopleContains(person.getFullName());
             log.trace("{} is depicted in {} images.",person, imagesCount);
             dto.setImagesCount(imagesCount);
             dtos.add(dto);

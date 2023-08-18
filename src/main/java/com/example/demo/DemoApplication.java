@@ -45,7 +45,7 @@ public class DemoApplication {
 					new SocketAddress( "localhost", 7687 ) 
 					)
         		.build();
-		
+		registerShutdownHook(managementService);
         return managementService;
     }
 
@@ -56,6 +56,18 @@ public class DemoApplication {
 			managementService.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
         log.info("Neo4j database Embedded instance is available: {}", graphDb.isAvailable());
         return graphDb;
+    }
+
+	private static void registerShutdownHook(final DatabaseManagementService managementService) {
+        // Registers a shutdown hook for the Neo4j instance so that it
+        // shuts down nicely when the VM exits (even if you "Ctrl-C" the
+        // running application).
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                managementService.shutdown();
+            }
+        });
     }
 
 	

@@ -42,7 +42,7 @@ public class ImageRepositoryJson implements ImageRepository {
         } catch (IOException e) {
             log.error("Failed to read json: ",e);
         }
-        log.info("Found {} images.", imageObjects.size());
+        log.info("Found {} images in json file.", imageObjects.size());
         return imageObjects;
     }
 

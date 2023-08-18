@@ -1,0 +1,15 @@
+digraph G {
+    # Optional display props:
+    graph[rankdir=TB style="filled,rounded" color=lightgrey]
+    node [shape=box]
+    # Descibe [married_to] relationship by placing couple in subgraph:
+    subgraph clusterMariaAndJack {
+        jack [label="Jack Doe\n03.01.1988"]
+        # Birthday will be parsed if provided like that:
+        mari [label="Maria\n15.11.1989"]
+    }
+    # Descibe [has_child] relationship by creating edges:
+    # It's not necessary to declare nodes explicitly, they can be literals:
+    { mari jack } -> { John Kate Peter }
+    
+}

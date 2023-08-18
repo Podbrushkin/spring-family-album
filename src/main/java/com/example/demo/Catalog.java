@@ -51,7 +51,7 @@ public class Catalog {
             ImageService imageService,
             GraphvizProcessor graphvizProc,
             @Value("${filepaths.tagIdToNameFile:#{null}}") String tagIdToNameFileStr,
-            @Value("${filepaths.graphvizTree:#{null}}") String graphvizTree,
+            @Value("${filepaths.graphvizTree:#{null}}") Path graphvizTree,
             @Value("${filepaths.imageMagickHashFiles:#{null}}") String[] imHashFiles,
             @Value("${filepaths.thumbsDirectory:#{null}}") String thumbsDirectory,
             @Value("${filepaths.whiteListDirectories:#{null}}") String[] whiteListDirectories,
@@ -90,7 +90,8 @@ public class Catalog {
         log.trace("imgObjs.size() {}",imgObjs.size());
 
         if (graphvizTree != null) {
-            var graphvizTreePath = Path.of(graphvizTree);
+            // var graphvizTreePath = Path.of(graphvizTree);
+            var graphvizTreePath = graphvizTree;
             if (Files.exists(graphvizTreePath)) {
                 try {
                     var dot = Files.readString(graphvizTreePath);
