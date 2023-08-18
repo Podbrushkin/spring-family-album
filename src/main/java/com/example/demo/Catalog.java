@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -24,18 +23,19 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
-import org.springframework.util.comparator.Comparators;
 
 import com.example.demo.data.ImageRepository;
 import com.example.demo.data.ImageRepositoryNeo4j;
 import com.example.demo.data.PersonRepository;
 import com.example.demo.graphviz.GraphvizProcessor;
 import com.example.demo.model.Image;
-import com.example.demo.model.Person;
 import com.example.demo.service.ImageService;
 
+
 @Component
+@DependsOn("graphDatabaseService")
 public class Catalog {
     Logger log = LoggerFactory.getLogger(getClass());
     private Path tagIdToNameFile;

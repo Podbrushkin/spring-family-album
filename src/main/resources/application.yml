@@ -4,11 +4,12 @@ spring:
     output:
         ansi:
             enabled: ALWAYS
-    neo4j:
-        uri: bolt://localhost:7687
-        authentication: 
-            username: user
-            password: 12345678
+    # neo4j:
+    #     uri: bolt://localhost:7687
+    #     authentication: 
+    #         username: neo4j
+    #         password: neo4j
+            # password: 12345678
 
 logging:
     charset:
@@ -31,8 +32,8 @@ filepaths:
     graphvizTree: C:\Users\user\Documents\FamilyTree Photos.txt
     thumbsDirectory: C:\users\user\thumbs\
     whiteListDirectories:
-        # E:\PHOTOS\Очень старые фотографии
-        E:\PHOTOS\Очень старые фотографии\скан2021
+        E:\PHOTOS\Очень старые фотографии
+        # E:\PHOTOS\Очень старые фотографии\скан2021
     blackListDirectories: 
         E:\PHOTOS\Старые фотографии\Виталик,
         E:\PHOTOS\iphone
