@@ -1,9 +1,9 @@
-spring:
-    thymeleaf:
-        cache: false
-    output:
-        ansi:
-            enabled: ALWAYS
+# spring:
+#     thymeleaf:
+#         cache: false
+#     output:
+#         ansi:
+#             enabled: ALWAYS
     # neo4j:
     #     uri: bolt://localhost:7687
     #     authentication: 
@@ -11,16 +11,16 @@ spring:
     #         password: neo4j
             # password: 12345678
 
-logging:
-    charset:
-        console: 866
-    pattern:
-        console: "%clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
-    level:
-        com.example: TRACE
-        com.example.graphviz: INFO
-        com.example.demo.ImageProvider: INFO
-        com.example.demo.service.PersonService: INFO
+# logging:
+#     charset:
+#         console: 866
+#     pattern:
+#         console: "%clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+#     level:
+#         com.example: TRACE
+#         com.example.graphviz: INFO
+#         com.example.demo.ImageProvider: INFO
+#         com.example.demo.service.PersonService: INFO
 
 filepaths:
     # dgkmRoot: E:\PHOTOS
@@ -33,7 +33,7 @@ filepaths:
     # tagIdToNameFile: C:\Users\user\Documents\RelativesDates.txt
     # graphvizTree: C:\Users\user\Documents\FamilyTree Photos.txt
     graphvizTree: classpath:sampleData\familyTree.dot
-    thumbsDirectory: C:\users\user\thumbs\
+    # thumbsDirectory: C:\users\user\thumbs\
     # whiteListDirectories:
     #     E:\PHOTOS\Очень старые фотографии
         # E:\PHOTOS\Очень старые фотографии\скан2021

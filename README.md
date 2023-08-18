@@ -12,16 +12,27 @@ In order to run this app you need a **JDK 17** and **Maven** in your Path.
 
 1. Download ZIP under `Code -> Download ZIP`
 2. Extract it to directory of your choice;
-3. Open Terminal in directory with `pom.xml` and execute `mvn clean spring-boot:run`
-4. Visit http:\\localhost:8080
+3. Make sure `src\main\resources\application.yml` file has only these properties set and nothing else:
+	```
+    filepaths:
+		imageObjectsJson: classpath:sampleData\imageObjs.json
+		graphvizTree: classpath:sampleData\familyTree.dot
+	```
 
-Webapp will launch with sample data - json and photos are included in project. The only property of `filepaths` group in application properties which should be set is this:
+4. Open Terminal in directory with `pom.xml` and execute `mvn clean spring-boot:run`
+5. Visit http:\\localhost:8080
 
-    filepaths.imageObjectsJson: classpath:sampleData\imageObjs.json
+Webapp will launch with sample data - tagged photos and family tree are included in project. 
+
+
 
 ## Digikam Database
 
-This app can extract Image objects from Digikam database. It is convenient because Digikam itself has capabilities of applying face tags to photos. In it's database Digikam contains filepaths relative to root photos directory, so there are two properties which probably will be specific to your installation and should be set in `src/main/resources/application.yml` file:
+This app can extract Image objects from Digikam database. It is convenient because Digikam itself has capabilities of applying face tags to photos. In it's database Digikam contains filepaths relative to root photos directory. 
+* Root photos directory is chosen during first run of **digikam**.
+* `digikam4.db` file by default is in `C:\users\%USERNAME%` directory.
+
+Add these properties to `src/main/resources/application.yml` file:
 
 ```
 filepaths:
@@ -32,7 +43,7 @@ jdbc:
 ```
 
 Notice how path to `digikam4.db` file is specified in `jdbc.url`.
-Don't forget to comment out (or remove) all unnecessary filepath properties.
+Don't forget to comment out (or remove) `filepaths.imageObjectsJson` property since imageObjects will be constructed from sqlite database instead of json file.
 
 ## Basic usage
 
