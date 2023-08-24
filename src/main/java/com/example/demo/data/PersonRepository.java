@@ -24,21 +24,6 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
     @Query("MATCH (:Image)-[:DEPICTS]->(person:Person) RETURN DISTINCT person")
     List<Person> findAllDepictedByAtLeastOneImage();
 
-    /* @Query("""
-        MATCH (i:Image)-[:DEPICTS]->(person:Person)
-        RETURN person,count(i)
-        """)
-    List<Map<Person,Integer>> findAllDepictedByAtLeastOneImageWithCounts(); */
-
-    @Query("""
-        MATCH (i:Image) -[:DEPICTS] -> (:Person {id: $personId})
-        RETURN count(i)
-        """)
-    public Integer countImagesForPersonId(@Param("personId") String personId);
-    // public Integer countImagesByPerson(Person person);
-
-    // MATCH path=(p)-[:HAS_CHILD*..]->()
-    // RETURN nodes(path), rels(path)
     @Query("""
         MATCH (p:Person)-[:HAS_CHILD*]->(ancestor:Person)
         WITH p, COLLECT(ancestor) AS ancestors
@@ -47,4 +32,11 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
         RETURN elementId(p)
     """)
     public String findIdOfOneWithMostAncestors();
+
+    @Query("""
+        MATCH (p:Person)-[:HAS_CHILD*]->(ancestor:Person)
+        WHERE elementId(p) = $predecessor
+        RETURN ancestor
+    """)
+    public List<Person> findAllAncestorsOf(@Param("predecessor") String predecessorId);
 }

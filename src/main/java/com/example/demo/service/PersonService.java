@@ -8,9 +8,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +20,6 @@ import com.example.demo.data.PersonRepository;
 import com.example.demo.graphviz.GraphvizProcessor;
 import com.example.demo.model.Person;
 import com.example.demo.model.PersonDto;
-
-import org.neo4j.driver.Value;
 
 @Service
 public class PersonService {
@@ -61,12 +58,6 @@ public class PersonService {
         return personRepository.findAllDepictedByAtLeastOneImage();
     }
 
-    /* public Collection<Person> findAllDepictedByAtLeastOneImageDto() {
-        var persons = findAllDepictedByAtLeastOneImage();
-        for (var p : persons) {
-
-        }
-    } */
     public Collection<PersonDto> findAllDepictedWithCountsDto() {
         if (this.allDepictedWithCountsDto != null) 
             return allDepictedWithCountsDto;
@@ -143,8 +134,7 @@ public class PersonService {
         return mermGraph.toString();
     }
 
-    @Autowired
-    private Driver driver;
+   
 
     public Map<String, List<Object>> fetchPersonGraph() {
         var people = this.findAll();
@@ -152,8 +142,21 @@ public class PersonService {
     }
 
     public Map<String, List<Object>> fetchPersonAncestorsGraph(Person person) {
-        // var people = this.findAll();
-        return buildJsonGraphOnHasChildRel(List.of(person));
+        // var people = personRepository.findAllAncestorsOf(person.getId());
+        var people = flattenChildren(person).toList();
+        log.trace("Found these ancestors of {}: \n{}",person, people);
+        // people.add(person);
+
+        
+
+        return buildJsonGraphOnHasChildRel(people);
+    }
+
+    private static Stream<Person> flattenChildren(Person person) {
+        return Stream.concat(
+            Stream.of(person), 
+            person.getChildren().stream().flatMap(PersonService::flattenChildren))
+        .peek(System.out::println);
     }
 
     public Map<String, List<Object>> buildJsonGraphOnHasChildRel(List<Person> people) {
@@ -166,12 +169,15 @@ public class PersonService {
                                 "title", person.getFullName(),
                                 "id",person.getId());
 
-            nodes.add(parent);
+            // if (!nodes.contains(parent)) 
+                nodes.add(parent);
             for (var child : person.getChildren()) {
                 /* var childJson = Map.of("label", "person", 
                                         "title", child.getFullName(),
-                                        "id",child.getId()); */
-            
+                                        "id",child.getId());
+                if (!nodes.contains(childJson)) 
+                    nodes.add(childJson); */
+                
                 var link = Map.of("source",person.getId(),
                     "target", child.getId());
                 links.add(link);
@@ -180,56 +186,11 @@ public class PersonService {
         return Map.of("nodes", nodes, "links", links);
     }
 
-    public Map<String, List<Object>> fetchPersonGraphOld() {
-        log.trace("Asked for person graph");
-		var nodes = new ArrayList<>();
-		var links = new ArrayList<>();
-
-		try (Session session = driver.session()) {
-            String query = """
-				MATCH (prnt:Person) - [r:HAS_CHILD] -> (chld:Person)
-				WITH prnt, chld
-				RETURN prnt.fullName AS parent, collect(chld.fullName) AS children
-                """;
-
-            var records = 
-                session.executeRead(tx -> tx.run(query).list());
-			
-			records.forEach(record -> {
-				var parent = Map.of("label", "person", 
-                                    "title", record.get("parent").asString());
-
-				int sourceIndex; // = nodes.size();
-
-                if (nodes.contains(parent)) {
-				    sourceIndex = nodes.indexOf(parent);
-                } else {
-                    nodes.add(parent);
-                    sourceIndex = nodes.size() - 1;
-                }
-
-				record.get("children").asList(Value::asString).forEach(name -> {
-					var child = Map.of("label", "person", "title", name);
-
-					int targetIndex;
-					if (nodes.contains(child)) {
-						targetIndex = nodes.indexOf(child);
-					} else {
-						nodes.add(child);
-						targetIndex = nodes.size() - 1;
-					}
-					links.add(Map.of("source", sourceIndex, "target", targetIndex));
-				});
-			});
-		}
-		return Map.of("nodes", nodes, "links", links);
-	}
-
     public List<Person> findAll() {
         return personRepository.findAll();
     }
     public Optional<Person> findOneById(String id) {
-        return personRepository.findOneById(id);
+        return personRepository.findById(id);
     }
     public Optional<Person> findOneByFullName(String fullName) {
         return personRepository.findOneByFullName(fullName);
@@ -242,6 +203,8 @@ public class PersonService {
     public Person findOneWithMostAncestors() {
         // Neo4jRepository default methods fetch nodes with full depth,
         // while custom-query methods are not. This is workaround.
+        // https://graphaware.com/neo4j/2016/04/06/mapping-query-entities-sdn.html
+        // https://neo4j.com/docs/ogm-manual/current/reference/#reference:session:loading-entities
         return
             personRepository.findById(personRepository.findIdOfOneWithMostAncestors()).get();
         

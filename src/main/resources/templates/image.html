@@ -46,8 +46,23 @@
             <span th:text="${cmnt.text}"></span>
         </li>
     </ul>
+    <div th:if="${image.people.size == 1} ">
     <h2>Граф:</h2>
-    
+    <div id="graph">
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/d3-force-boundary@0.0.3/dist/d3-force-boundary.min.js"></script>
+    <script th:src="@{~/d3.js}"></script>
+    <script>
+        // var people = [[${image}]];
+        // var personId = image.people[0].id
+        var personId = '[[${image.people[0].id}]]'
+        console.log(personId);
+        d3.json("/graph/"+personId).then( function (data) {
+            chart(data);
+        });
+    </script>
+    </div>
 </body>
 
 </html>
