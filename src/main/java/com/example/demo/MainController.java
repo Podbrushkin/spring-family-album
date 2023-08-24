@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,6 +155,39 @@ public class MainController {
 		model.put("next", prevAndNext.get("next"));
 
 		return "image.html";
+	}
+
+	
+
+
+
+	@GetMapping(value = "/showGraph")
+	public String graph() {
+		return "graph.html";
+	}
+	@GetMapping(value = "/showTable")
+	public String table(ModelMap model) {
+		var people = personService.findAll();
+		// personRepository.findAll();
+        List<Map> namesBdays = people.stream()
+            .map(p -> Map.of("fullName",p.getFullName(),
+                "birthday",p.getBirthday() == null ? "" : p.getBirthday()))
+            .collect(Collectors.toList());
+		model.put("people", namesBdays);
+		return "table.html";
+	}
+	@GetMapping(value = "/showFamilyTree")
+	public String tree(ModelMap model) {
+		var predecessor = personService.findOneWithMostAncestors();
+		log.trace("Ancestors of this person will be shown: {}({} children)", predecessor.getFullName(),predecessor.getChildren().size());
+		var mermaid = 
+			personService.getMermaidGraphFor(predecessor);
+		
+		model.put("mermaid", mermaid);
+
+		var graphviz = personService.getFullGraphvizSvg();
+		model.put("svg", graphviz);
+		return "mermaidGraph.html";
 	}
 
 }

@@ -15,6 +15,7 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
     Optional<Person> findOneById(String id);
     Optional<Person> findOneByBirthday(LocalDate birthday);
     Optional<Person> findOneByBirthday(String birthday);
+    Optional<Person> findOneByFullName(String fullname);
 
     List<Person> findAllByBirthdayIn(Collection<LocalDate> birthdays);
 
@@ -35,4 +36,15 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
         """)
     public Integer countImagesForPersonId(@Param("personId") String personId);
     // public Integer countImagesByPerson(Person person);
+
+    // MATCH path=(p)-[:HAS_CHILD*..]->()
+    // RETURN nodes(path), rels(path)
+    @Query("""
+        MATCH (p:Person)-[:HAS_CHILD*]->(ancestor:Person)
+        WITH p, COLLECT(ancestor) AS ancestors
+        ORDER BY size(ancestors) DESC
+        LIMIT 1
+        RETURN elementId(p)
+    """)
+    public String findIdOfOneWithMostAncestors();
 }

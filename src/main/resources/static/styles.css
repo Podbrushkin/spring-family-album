@@ -4,6 +4,33 @@ body {
   background-color: LightGrey;
 }
 
+.navbar {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+.navbar li {
+	float: left;
+	
+	
+}
+
+.navbar li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+.navbar li a:hover:not(.active, #greeting) {
+  background-color: #111;
+}
+.navbar .active {
+  background-color: #04AA6D;
+}
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -40,8 +67,14 @@ body {
   background-color: #3e8e41;
 }
 
-.checkboxForm form {
+.checkboxForm {
   text-align: left;
+}
+
+.block {
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .checkboxForm .button-container {
@@ -112,3 +145,17 @@ input[type=checkbox]:checked ~ label {
 	opacity: 0.8;
 	font-size: 80%;
 }
+
+#graph {
+  /* position: absolute;
+  top: 0;
+  margin: auto;
+  height: 100%;
+  width: 100%;
+  z-index: -100; */
+  /* opacity: 0.3;
+  pointer-events: all; */
+}
+/* body > *:not(#graph) {
+  z-index: 1;
+} */

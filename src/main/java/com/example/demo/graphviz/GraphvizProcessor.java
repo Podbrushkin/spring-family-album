@@ -1,6 +1,8 @@
 package com.example.demo.graphviz;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +19,10 @@ import org.springframework.stereotype.Component;
 
 import com.example.demo.model.Person;
 
+import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.engine.GraphvizJdkEngine;
+import guru.nidi.graphviz.engine.GraphvizV8Engine;
 import guru.nidi.graphviz.model.Link;
 import guru.nidi.graphviz.model.LinkTarget;
 import guru.nidi.graphviz.model.MutableGraph;
@@ -26,10 +31,39 @@ import guru.nidi.graphviz.parse.Parser;
 @Component
 public class GraphvizProcessor {
     private static Logger log = LoggerFactory.getLogger(GraphvizProcessor.class.getName());
+    private static MutableGraph fullGraph;
+    private static Path baseDir;
+    private static String fullSvg;
+
 
     // private PersonConverter personConverter = new PersonConverter();
 
 
+    public String getSvg() {
+        log.trace("Asked for SVG for graph of {} nodes.",fullGraph.nodes().size());
+        Graphviz.useEngine(new GraphvizV8Engine(), new GraphvizJdkEngine());
+        if (fullSvg == null)
+        fullSvg =
+            Graphviz.fromGraph(fullGraph)
+                .width(800)
+                // .height(100)
+                .basedir(baseDir.toFile())
+                .render(Format.SVG).toString();
+        return fullSvg;
+    }
+    public List<Person> getPeople(Path graphvizTreePath) {
+        if (Files.exists(graphvizTreePath)) {
+            try {
+                var dot = Files.readString(graphvizTreePath);
+                baseDir = graphvizTreePath.getParent();
+                return getPeople(dot);
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
     public List<Person> getPeople(String dot) {
         
         List<Person> personDots = new GraphvizProcessor().crawlDot(dot);
@@ -69,6 +103,7 @@ public class GraphvizProcessor {
         try {
             dot = removeComments(dot);
             MutableGraph g = new Parser().read(dot);
+            fullGraph = g;
             describeMutableGraph(g);
             List<Person> people = new ArrayList<>();
             createPersonObjsFromRootNodesAndTheirLinks(people,g);

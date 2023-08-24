@@ -3,12 +3,11 @@
 <head>
     <link href="../../../resources/static/styles.css" rel="stylesheet" media="screen" th:href="@{styles.css}" />
     <link rel="stylesheet" media="screen" th:href="@{gallery.css}" />
+    <!-- <link rel="stylesheet" href="https://neo4j-documentation.github.io/developer-resources/language-guides/assets/css/main.css"> -->
 </head>
 
 <body>
-    <div class="button-container" >
-        <a href="/" style="background-color:grey;">Домой</a></div>
-
+    <header th:replace="fragments/header :: header" />
     <form th:action="@{/processForm}" method="get" class="checkboxForm">
         <div style="columns: 3; column-gap: 20px;">
             <div th:each="tag, iter : ${allDepictedPeople}">
@@ -71,7 +70,7 @@
         <li th:text="'currentPage='+${currentPage}"></li>
         <li th:text="'pageSize='+${pageSize}"></li>
     </ul>
-
+    
 </body>
 
 </html>

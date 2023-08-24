@@ -95,7 +95,7 @@ public class Catalog {
             if (Files.exists(graphvizTreePath)) {
                 try {
                     var dot = Files.readString(graphvizTreePath);
-                    removeAllPersonsFromDbAndAddNewFromGraphviz(personRepository, graphvizProc, dot);
+                    removeAllPersonsFromDbAndAddNewFromGraphviz(personRepository, graphvizProc, graphvizTreePath);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -105,7 +105,7 @@ public class Catalog {
         createImageDepictsPersonRels(imageRepositoryNeo4j, personRepository);
     }
 
-    private void removeAllPersonsFromDbAndAddNewFromGraphviz(PersonRepository personRepositoryNeo4j, GraphvizProcessor gp, String dot) {
+    private void removeAllPersonsFromDbAndAddNewFromGraphviz(PersonRepository personRepositoryNeo4j, GraphvizProcessor gp, Path dot) {
         personRepositoryNeo4j.deleteAll();
         var peop = gp.getPeople(dot);
         log.info("Graphviz file provided {} people.",peop.size());

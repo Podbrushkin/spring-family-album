@@ -10,10 +10,14 @@
 
 <body>
     <!-- <h1>Image Viewer</h1> -->
+    <header th:replace="fragments/header :: header" />
     <div class="button-container">
         <a href="/search?goBack=true">&lt; Галерея</a>
     </div>
-    <img id="imgSingle" th:src="@{'/image/' + ${image.anyHash}}" th:alt="${image.anyHash}" />
+    <img id="imgSingle" 
+        th:src="@{'/image/' + ${image.anyHash}}" 
+        th:alt="${image.anyHash}"
+        th:title="${image.creationDate} +'&#10;'+ ${image.filePath}" />
 
     <div class="button-container">
         <a th:if="${previous != null}" th:href="@{/imagePage/{hash}(hash=${previous.anyHash})}" style="float: left;">
@@ -42,6 +46,8 @@
             <span th:text="${cmnt.text}"></span>
         </li>
     </ul>
+    <h2>Граф:</h2>
+    
 </body>
 
 </html>

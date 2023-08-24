@@ -2,6 +2,7 @@ package com.example.demo;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -19,8 +20,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @SpringBootApplication
 @EnableNeo4jRepositories
@@ -90,6 +97,23 @@ public class DemoApplication {
                 .url("jdbc:sqlite:memory:mockDb")
                 .build();
 		}
+	}
+
+	// https://www.baeldung.com/spring-boot-get-all-endpoints
+	@EventListener
+	public void handleContextRefresh(ContextRefreshedEvent event) {
+		ApplicationContext applicationContext = event.getApplicationContext();
+		RequestMappingHandlerMapping requestMappingHandlerMapping = applicationContext
+			.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class);
+		Map<RequestMappingInfo, HandlerMethod> map = requestMappingHandlerMapping
+			.getHandlerMethods();
+
+		var endpoints = new StringBuilder();
+		map.forEach((key, value) -> 
+			endpoints.append(key+"\t"+value+"\n")
+			// log.info("{} {}", key, value)
+			);
+		log.info("Following endpoints have been found: \n {}", endpoints);
 	}
 
 	

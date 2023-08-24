@@ -1,0 +1,25 @@
+<html>
+<head>
+  <title>Mermaid Graph</title>
+  
+  <link href="../../../resources/static/styles.css" rel="stylesheet" media="screen" th:href="@{styles.css}" />
+  <script src="https://unpkg.com/mermaid@8.0.0/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <header th:replace="fragments/header :: header" />
+    <div> 
+        <h1>Flowchart</h1>
+        <div class="mermaid" th:text="${mermaid}" >
+         graph LR
+          A[Square Rect] -- Link text --> B((Circle))
+          A --> C(Round Rect)
+          B --> D{Rhombus}
+          C --> D
+        </div>
+       
+
+    </div>
+    <h2>Graphviz:</h2>
+    <div th:utext="${svg}"></div>
+</body>
+</html>

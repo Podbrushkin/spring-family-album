@@ -102,6 +102,7 @@ public class Person {
 
     
 
+    
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -109,6 +110,7 @@ public class Person {
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + ((dotId == null) ? 0 : dotId.hashCode());
         result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
+        result = prime * result + ((birthday == null) ? 0 : birthday.hashCode());
         return result;
     }
     @Override
@@ -134,6 +136,11 @@ public class Person {
             if (other.fullName != null)
                 return false;
         } else if (!fullName.equals(other.fullName))
+            return false;
+        if (birthday == null) {
+            if (other.birthday != null)
+                return false;
+        } else if (!birthday.equals(other.birthday))
             return false;
         return true;
     }
