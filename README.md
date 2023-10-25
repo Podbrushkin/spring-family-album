@@ -60,3 +60,12 @@ Don't forget to comment out (or remove) `filepaths.imageObjectsJson` property si
 * You can use `thumbsDirectory` property to specify a path to directory which contains `\d{32}.[(png)(jpg)]` files where 32 chars is a digikam-calculated hashcode of an image this thumbnail refers to. Those thumbnails will be used in gallery view and are supposed to lower disk and network usage. There is no implicit thumbnail creation capabilities in this webapp.
 * Use `whiteListDirectories` and `blackListDirectories` properties to filter subset of images to be shown.
 * Use `imageMagickHashFiles` property to specify a path(s) to `FullName->ImageHash->Length` TSV files, where `ImageHash` is a 64-char hashcode calculated by ImageMagick. It lets you to overwrite file paths for images found in `imageobjects.json` file. Fore every image deserialized from json file, if it's `imHash` found in one of those `imageMagickHashFiles`, filepath from this file will be used instead of one which is written in json file.
+
+## Expore data
+
+This app works around Neo4j database. It is emmbedded, so it isn't possible to run Neo4j Browser for embedded database which is currently in use. But once application is stopped, it leaves database populated in `./target/` directory, and you can run separate neo4j server against this database to visually explore data created by application. If you're in current directory with Powershell, execute following commands and visit http://localhost:7474 .
+
+	$neo4jDataDir = './target/mydb/data/'
+	docker run --name neo4j-1 --rm -v $neo4jDataDir`:/data -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/qwertyuiop -d neo4j
+
+![Neo4j Schema Visualization](img/neo4j%20schema.jpg)
