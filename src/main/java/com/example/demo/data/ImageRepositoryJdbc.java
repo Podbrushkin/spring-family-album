@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.model.Image;
+import com.example.demo.databasePopulating.ImageResultSetExtractor;
 
 @Repository
 // @Primary

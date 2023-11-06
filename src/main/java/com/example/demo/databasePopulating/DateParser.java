@@ -1,4 +1,4 @@
-package com.example.demo.data;
+package com.example.demo.databasePopulating;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;

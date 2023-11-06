@@ -103,7 +103,7 @@ public class GraphvizProcessor {
         try {
             dot = removeComments(dot);
             MutableGraph g = new Parser().read(dot);
-            fullGraph = g;
+            GraphvizProcessor.fullGraph = g;
             describeMutableGraph(g);
             List<Person> people = new ArrayList<>();
             createPersonObjsFromRootNodesAndTheirLinks(people,g);

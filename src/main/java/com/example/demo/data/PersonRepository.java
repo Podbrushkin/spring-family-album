@@ -38,5 +38,5 @@ public interface PersonRepository extends Neo4jRepository<Person, String> {
         WHERE elementId(p) = $predecessor
         RETURN ancestor
     """)
-    public List<Person> findAllAncestorsOf(@Param("predecessor") String predecessorId);
+    public List<Person> findAllAncestorsOf(@Param("predecessor") String descendantId);
 }

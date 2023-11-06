@@ -1,4 +1,4 @@
-package com.example.demo.data;
+package com.example.demo.databasePopulating;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,11 +15,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.databasePopulating.DateParser;
+import com.example.demo.data.ImageRepositoryJdbc;
 import com.example.demo.model.Image;
 
 @Component
 @ConditionalOnBean(ImageRepositoryJdbc.class)
-class ImageResultSetExtractor implements ResultSetExtractor<Map<String, Image>> {
+public class ImageResultSetExtractor implements ResultSetExtractor<Map<String, Image>> {
     Logger log = LoggerFactory.getLogger(getClass());
     @Value("${filepaths.dgkmRoot}")
     private String dgkmRoot;

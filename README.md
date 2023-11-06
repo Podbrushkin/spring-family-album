@@ -61,7 +61,7 @@ Don't forget to comment out (or remove) `filepaths.imageObjectsJson` property si
 * Use `whiteListDirectories` and `blackListDirectories` properties to filter subset of images to be shown.
 * Use `imageMagickHashFiles` property to specify a path(s) to `FullName->ImageHash->Length` TSV files, where `ImageHash` is a 64-char hashcode calculated by ImageMagick. It lets you to overwrite file paths for images found in `imageobjects.json` file. Fore every image deserialized from json file, if it's `imHash` found in one of those `imageMagickHashFiles`, filepath from this file will be used instead of one which is written in json file.
 
-## Expore data
+## Explore data
 
 This app works around Neo4j database. It is emmbedded, so it isn't possible to run Neo4j Browser for embedded database which is currently in use. But once application is stopped, it leaves database populated in `./target/` directory, and you can run separate neo4j server against this database to visually explore data created by application. If you're in current directory with Powershell, execute following commands and visit http://localhost:7474 .
 

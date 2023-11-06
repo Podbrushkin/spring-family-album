@@ -2,7 +2,6 @@ package com.example.demo;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,11 +37,9 @@ import com.example.demo.service.ImageService;
 @DependsOn("graphDatabaseService")
 public class Catalog {
     Logger log = LoggerFactory.getLogger(getClass());
-    private Path tagIdToNameFile;
-    private Map<String, String> tagIdToNameMap;
     private Set<Image> imageObjects;
-    private Set<String> tags;
-    ImageRepositoryNeo4j imageRepositoryNeo4j;
+    // private Set<String> tags;
+    // private ImageRepositoryNeo4j imageRepositoryNeo4j;
 
     public Catalog(
             ImageRepository imageRepository,
@@ -58,9 +55,7 @@ public class Catalog {
             @Value("${filepaths.blackListDirectories:#{null}}") String[] blackListDirectories) {
         imageObjects = imageRepository.getImages();
 
-        this.tagIdToNameFile = tagIdToNameFileStr == null ? null : Path.of(tagIdToNameFileStr);
-        this.tagIdToNameMap = createTagIdToNameMap(tagIdToNameFile);
-        this.imageRepositoryNeo4j = imageRepositoryNeo4j;
+        // this.imageRepositoryNeo4j = imageRepositoryNeo4j;
         
         var imagesInitialCount = imageRepositoryNeo4j.count();
         if (imagesInitialCount > 0) {
@@ -68,7 +63,7 @@ public class Catalog {
             imageRepositoryNeo4j.deleteAll();
         }
         
-        tags = getTags();
+        // tags = getTags();
 
         var mgckHashToPath = initMgckHashToFilepath(imHashFiles);
         addImHashToImgs(mgckHashToPath, imageObjects);
@@ -93,12 +88,7 @@ public class Catalog {
             // var graphvizTreePath = Path.of(graphvizTree);
             var graphvizTreePath = graphvizTree;
             if (Files.exists(graphvizTreePath)) {
-                try {
-                    var dot = Files.readString(graphvizTreePath);
-                    removeAllPersonsFromDbAndAddNewFromGraphviz(personRepository, graphvizProc, graphvizTreePath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                removeAllPersonsFromDbAndAddNewFromGraphviz(personRepository, graphvizProc, graphvizTreePath);
             }
         }
 
@@ -231,7 +221,7 @@ public class Catalog {
         return result;
     }
 
-    public void logExtensionCounts(Collection<Image> images) {
+    private void logExtensionCounts(Collection<Image> images) {
         Map<String, Long> extensionCounts = images.stream()
                 .map(image -> getFileExtension(image.getFilePath()))
                 .collect(Collectors.groupingBy(extension -> extension, Collectors.counting()));
@@ -314,38 +304,16 @@ public class Catalog {
         return imageObjects.stream();
     }
 
-    public Set<String> getTags() {
-        if (tags == null) {
-            tags = imageObjects.stream()
-                    .flatMap(img -> img.getTags().stream())
-                    .distinct()
-                    .collect(Collectors.toSet());
-            log.info("Found {} unique tags from {} imageObjects.", tags.size(), imageObjects.size());
-        }
-        return tags;
-    }
-
-    public String getTagNameExtended(String tagId) {
-        return tagIdToNameMap.get(tagId);
-    }
-
-    private Map<String, String> createTagIdToNameMap(Path tagIdToNameFile) {
-        var tagIdToNameMap = new HashMap<String, String>();
-        if (tagIdToNameFile == null) return tagIdToNameMap;
-        try {
-            Files.lines(tagIdToNameFile, Charset.forName("UTF-8"))
-                    .skip(1)
-                    .forEach(s -> {
-                        var pair = s.split("\\t");
-                        tagIdToNameMap.put(pair[1], pair[0]);
-                    });
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        log.trace("{} tag extended names have been read from tsv file.", tagIdToNameMap.size());
-        return tagIdToNameMap;
-    }
+    // private Set<String> getTags() {
+    //     if (tags == null) {
+    //         tags = imageObjects.stream()
+    //                 .flatMap(img -> img.getTags().stream())
+    //                 .distinct()
+    //                 .collect(Collectors.toSet());
+    //         log.info("Found {} unique tags from {} imageObjects.", tags.size(), imageObjects.size());
+    //     }
+    //     return tags;
+    // }
 
     private Map<String, Path> tsvToMap(Path tsvFile) {
 
