@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.example.demo.data.ImageRepositoryNeo4j;
 import com.example.demo.model.PersonDto;
 import com.example.demo.model.Tag;
 import com.example.demo.service.ImageService;
@@ -34,7 +35,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-@SessionAttributes({"selectedTags","selectedYear","currentPage","pageSize"})
+@SessionAttributes({"selectedTags","selectedYear","currentPage","pageSize","images"})
 public class MainController {
 	Logger log = LoggerFactory.getLogger(getClass());
 
@@ -61,15 +62,6 @@ public class MainController {
 		}
 		selectableYears.sort(Comparator.comparing(t -> t.getName()));
 		return selectableYears;
-	}
-
-	@GetMapping(value = "/")
-	public String index(ModelMap model) {
-
-		// model.put("checkboxForm", new CheckboxForm());
-		log.info("index() was called");
-		model.addAttribute("imagesCount", catalog.getImageObjects().count());
-		return "index.html";
 	}
 
 	@GetMapping(value = "/processForm")
@@ -144,16 +136,16 @@ public class MainController {
 
 	@GetMapping("/imagePage/{imgHash:[^\\\\.]+}")
 	public String getImagePageByHash(@PathVariable(required = true) String imgHash,
-			@SessionAttribute List<String> selectedTags,
+			@SessionAttribute(required = false) List<String> selectedTags,
 			@SessionAttribute Optional<Integer> selectedYear,
 			ModelMap model) {
 		var img = imageService.getImageForHash(imgHash);
 		model.addAttribute("image", img);
-
+		if (selectedTags != null) {
 		var prevAndNext = imageService.getNextAndPreviousImages(selectedTags, selectedYear, img);
-		model.put("previous", prevAndNext.get("previous"));
-		model.put("next", prevAndNext.get("next"));
-
+			model.put("previous", prevAndNext.get("previous"));
+			model.put("next", prevAndNext.get("next"));
+		}
 		return "image.html";
 	}
 
@@ -189,5 +181,34 @@ public class MainController {
 		model.put("svg", graphviz);
 		return "mermaidGraph.html";
 	}
+
+	@Autowired
+	ImageRepositoryNeo4j imageRep;
+
+	@GetMapping(value =  "/findImagesByCypherQuery")
+	public String findImagesByCypherQuery(
+		@RequestParam String cypherQuery, 
+		ModelMap model) {
+		log.debug("Got this cypherQuery: {}", cypherQuery);
+		// var images = imageRep.findImagesByCypherQuery(cypherQuery);
+		var images = imageRep.findImagesByCypherQuery(cypherQuery);
+		
+		model.put("cypherQuery", cypherQuery);
+		model.put("images", images);
+		model.put("pageSize", 25);
+		model.put("currentPage", 1);
+		
+		return "index.html";
+	}
+	
+	@GetMapping(value =  "/")
+	public String cypherGoToPage(
+		@RequestParam(defaultValue = "1") Integer page,
+		ModelMap model
+	) {
+		model.put("currentPage", page);
+		return "index.html";
+	}
+
 
 }

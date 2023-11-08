@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import com.example.demo.model.Image;
 import com.example.demo.model.Person;
 
-public interface ImageRepositoryNeo4j extends Neo4jRepository<Image, String> {
+public interface ImageRepositoryNeo4j extends Neo4jRepository<Image, String>, ImageRepositoryNeo4jFragment {
     @Query("""
             MATCH (i:Image), (p:Person)
             WHERE 
@@ -74,6 +74,7 @@ public interface ImageRepositoryNeo4j extends Neo4jRepository<Image, String> {
         MATCH (i:Image) -[:DEPICTS] -> (p:Person {fullName: $person})
         RETURN count(i)
         """)
+    // TODO: personFullname is not unique, use smth else
     public Integer countByPeopleContains(@Param("person") String personFullName);
 
     @Query("""

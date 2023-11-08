@@ -33,22 +33,47 @@
     <span th:if="${selectedYear != null}" th:text="${selectedYear.isPresent() ? selectedYear.get() : 'любой'} + ' год. Найдено '+${totalImages}+' фотографий.'"></span>
     <span th:text="'imagesCount='+${imagesCount}"></span> -->
 
+    <div th:if="${true or images == null or images.size() == 0}">
+        <form th:action="@{/findImagesByCypherQuery}" method="GET">
+            <textarea name="cypherQuery" 
+                placeholder="Enter your Cypher query" th:text="${cypherQuery}"
+                rows="5" cols="50"
+                required ></textarea>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
 
     <ul class="gallery">
-        <li th:each="img : ${images}">
+        <li th:each="img, iter : ${images}" th:if="${iter.index >= (pageSize * (currentPage - 1)) and iter.index < (pageSize * currentPage)}">
             <a th:href="@{/imagePage/{img}(img=${img.anyHash})}">
                 <div class="gallery-item">
                     <img th:src="@{/thumbnail/{img}(img=${img.anyHash})}"
-                        th:title="${img.creationDate} +'&#10;'+ ${img.filePath}">
+                        th:title="${img.creationDate} +'&#10;'+ ${img.filePath}+'&#10;'+ ${iter.index}">
                 </div>
             </a>
         </li>
     </ul>
-
+    
     <br />
 
+    <div th:if="${images != null AND images.size > pageSize}">
 
-    <div th:if="${totalPages > 1}">
+        <ul class="pagination">
+            <li th:if="${currentPage > 1}">
+                <a th:href="@{'/'(page=${currentPage - 1})}">&lt; Previous</a>
+            </li>
+
+            <li th:each="page : ${#numbers.sequence(1, T(java.lang.Math).ceil(images.size*1.0/pageSize))}" th:class="${page == currentPage} ? active : ''">
+                <a th:href="@{'/'(page=${page})}" th:text="${page}"></a>
+            </li>
+
+            <li th:if="${currentPage < images.size/pageSize}">
+                <a th:href="@{'/'(page=${currentPage + 1})}">Next &gt;</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- <div th:if="${totalPages > 1}">
 
         <ul class="pagination">
             <li th:if="${currentPage > 1}">
@@ -63,12 +88,16 @@
                 <a th:href="@{''(page=${currentPage + 1}, pageSize=${pageSize})}">Next &gt;</a>
             </li>
         </ul>
-    </div>
+    </div> -->
+
+
+
     <ul>
-        <li th:text="'totalImages='+${totalImages}"></li>
+        <li th:text="'totalImages='+${images.size}"></li>
         <li th:text="'totalPages='+${totalPages}"></li>
         <li th:text="'currentPage='+${currentPage}"></li>
         <li th:text="'pageSize='+${pageSize}"></li>
+        <li th:text="'number of pages='+${images.size*1.0/pageSize}"></li>
     </ul>
     
 </body>
