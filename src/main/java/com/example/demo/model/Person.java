@@ -12,14 +12,14 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 import org.springframework.data.neo4j.core.schema.Relationship.Direction;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Node("Person")
 public class Person {
     
     @Id
     @GeneratedValue
-    String id;
+    private String id;
     
     private String dotId;
     
@@ -28,11 +28,11 @@ public class Person {
     private LocalDate birthday;
 
     @Relationship(type = "HAS_CHILD", direction = Direction.OUTGOING)
-    @JsonIgnoreProperties
+    @JsonIgnore
 	private Set<Person> children = new HashSet<>();
     
     @Relationship(type = "MARRIED_TO", direction = Direction.OUTGOING)
-    @JsonIgnoreProperties
+    @JsonIgnore
 	private Person spouse;
 
     public Person(String dotId, String fullName) {
@@ -50,6 +50,7 @@ public class Person {
     public LocalDate getBirthday() {
         return birthday;
     }
+    @JsonIgnore
     public String getBirthdayOrFullName() {
         return birthday == null ? this.fullName : this.birthday.toString();
     }

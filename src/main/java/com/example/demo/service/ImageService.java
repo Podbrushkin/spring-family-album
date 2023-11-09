@@ -17,33 +17,17 @@ import org.springframework.stereotype.Service;
 import com.example.demo.data.ImageRepositoryNeo4j;
 
 import com.example.demo.model.Image;
-import com.example.demo.model.Page;
 
 @Service
 public class ImageService {
-    Logger log = LoggerFactory.getLogger(getClass());
+    private Logger log = LoggerFactory.getLogger(getClass());
+    
     @Autowired
-    PersonService personService;
-    @Autowired
-    ImageRepositoryNeo4j imageRepositoryNeo4j;
-    Comparator<Image> imgComparator = Comparator.comparing(Image::getCreationDate);
+    private ImageRepositoryNeo4j imageRepositoryNeo4j;
+    private Comparator<Image> imgComparator = Comparator.comparing(Image::getCreationDate);
 
     public Image getImageForHash(String hash) {
         return imageRepositoryNeo4j.findOneByImHashOrDgkmHash(hash, hash);
-    }
-
-    public Page<Image> getImagesForTagsPageable(Collection<String> tags, Optional<Integer> yearOpt, int page, int perPage) {
-
-        List<Image> imageList = this.getAllImagesForTags(tags, yearOpt);
-
-        int totalItems = imageList.size();
-        imageList = imageList.stream()
-                .skip(perPage * (page - 1))
-                .limit(perPage)
-                .collect(Collectors.toList());
-
-        int totalPages = (int) Math.ceil((double) totalItems / perPage);
-        return new Page<Image>(imageList, page, totalPages, totalItems);
     }
 
     public List<Image> getAllImagesForTags(Collection<String> tags, Optional<Integer> yearOpt) {
@@ -85,5 +69,9 @@ public class ImageService {
         }
         log.trace("Found prev and next images for {}: {}",img.getFilePath(), result);
         return result;
+    }
+
+    public List<Image> findImagesByCypherQuery(String cypher) {
+        return imageRepositoryNeo4j.findImagesByCypherQuery(cypher);
     }
 }

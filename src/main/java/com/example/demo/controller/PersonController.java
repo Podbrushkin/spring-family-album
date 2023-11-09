@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -25,6 +24,11 @@ public class PersonController {
         this.personRepository = personRepository;
     }
 
+    @GetMapping("/")
+    List<Person> getPersons() {
+        return personRepository.findAll();
+    }
+
     
     @GetMapping("/names")
     List<String> getPersonsNames() {
@@ -34,12 +38,9 @@ public class PersonController {
     }
 
     @GetMapping("/{birthday}")
-    Optional<Person> findOneByBirthday(@PathVariable("birthday") LocalDate birthday) {
+    Person findOneByBirthday(@PathVariable("birthday") LocalDate birthday) {
         log.trace("birthday to find: {}",birthday);
-        // var ld = LocalDate.parse(birthday);
-        // log.trace("LocalDate parsed: {}", ld);
-        // var person = personRepository.findOneByBirthday(ld);
-        var person = personRepository.findOneByBirthday(birthday);
+        var person = personRepository.findOneByBirthday(birthday).orElse(null);
         
         return person;
     }

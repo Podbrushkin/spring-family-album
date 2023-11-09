@@ -3,7 +3,6 @@
 <head>
     <link href="../../../resources/static/styles.css" rel="stylesheet" media="screen" th:href="@{styles.css}" />
     <link rel="stylesheet" media="screen" th:href="@{gallery.css}" />
-    <!-- <link rel="stylesheet" href="https://neo4j-documentation.github.io/developer-resources/language-guides/assets/css/main.css"> -->
 </head>
 
 <body>
@@ -67,30 +66,11 @@
                 <a th:href="@{'/'(page=${page})}" th:text="${page}"></a>
             </li>
 
-            <li th:if="${currentPage < images.size/pageSize}">
+            <li th:if="${currentPage <= images.size/pageSize}">
                 <a th:href="@{'/'(page=${currentPage + 1})}">Next &gt;</a>
             </li>
         </ul>
     </div>
-
-    <!-- <div th:if="${totalPages > 1}">
-
-        <ul class="pagination">
-            <li th:if="${currentPage > 1}">
-                <a th:href="@{''(page=${currentPage - 1}, pageSize=${pageSize})}">&lt; Previous</a>
-            </li>
-
-            <li th:each="page : ${#numbers.sequence(1, totalPages)}" th:class="${page == currentPage} ? active : ''">
-                <a th:href="@{''(page=${page}, pageSize=${pageSize})}" th:text="${page}"></a>
-            </li>
-
-            <li th:if="${currentPage < totalPages}">
-                <a th:href="@{''(page=${currentPage + 1}, pageSize=${pageSize})}">Next &gt;</a>
-            </li>
-        </ul>
-    </div> -->
-
-
 
     <ul>
         <li th:text="'totalImages='+${images.size}"></li>

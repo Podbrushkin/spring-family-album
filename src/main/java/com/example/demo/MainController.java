@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.example.demo.data.ImageRepositoryNeo4j;
 import com.example.demo.model.PersonDto;
 import com.example.demo.model.Tag;
 import com.example.demo.service.ImageService;
@@ -37,7 +36,7 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 @SessionAttributes({"selectedTags","selectedYear","currentPage","pageSize","images"})
 public class MainController {
-	Logger log = LoggerFactory.getLogger(getClass());
+	private Logger log = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	ImageProvider imageProvider;
@@ -81,27 +80,19 @@ public class MainController {
 	public String processQueryParams(
 			@SessionAttribute(required = false) List<String> selectedTags,
 			@SessionAttribute(required = false) Optional<Integer> selectedYear,
-			@RequestParam(name = "page", defaultValue = "1") int page,
-			@RequestParam(name = "pageSize", defaultValue = "40") int pageSize,
 			@RequestParam(name = "goBack", defaultValue = "false") boolean goBack,
-			ModelMap model,
-			HttpSession session) {
+			ModelMap model) {
 		log.trace("SessionAttrs: tags={}, year={}", selectedTags, selectedYear);
 
 		if (selectedTags == null) {
 			return "redirect:/";
-		} else if (goBack) {
-			page = (int) session.getAttribute("currentPage");
-			pageSize = (int) session.getAttribute("pageSize");
 		}
-		
-		var imagePage = imageService.getImagesForTagsPageable(selectedTags, selectedYear, page, pageSize);
-		model.put("images", imagePage.getItems());
-		model.addAttribute("currentPage", page);
-		model.addAttribute("pageSize", pageSize);
-		model.addAttribute("totalPages", imagePage.getTotalPages());
-		model.addAttribute("totalImages", imagePage.getTotalItems());
-		
+		var images = imageService.getAllImagesForTags(selectedTags, selectedYear);
+		model.put("images", images);
+		model.put("pageSize", 25);
+		if (!goBack)
+			model.put("currentPage", 1);
+
 		return "index.html";
 	}
 	
@@ -148,24 +139,12 @@ public class MainController {
 		}
 		return "image.html";
 	}
-
-	
-
-
-
 	@GetMapping(value = "/showGraph")
 	public String graph() {
 		return "graph.html";
 	}
 	@GetMapping(value = "/showTable")
 	public String table(ModelMap model) {
-		var people = personService.findAll();
-		// personRepository.findAll();
-        List<Map> namesBdays = people.stream()
-            .map(p -> Map.of("fullName",p.getFullName(),
-                "birthday",p.getBirthday() == null ? "" : p.getBirthday()))
-            .collect(Collectors.toList());
-		model.put("people", namesBdays);
 		return "table.html";
 	}
 	@GetMapping(value = "/showFamilyTree")
@@ -182,16 +161,13 @@ public class MainController {
 		return "mermaidGraph.html";
 	}
 
-	@Autowired
-	ImageRepositoryNeo4j imageRep;
-
 	@GetMapping(value =  "/findImagesByCypherQuery")
 	public String findImagesByCypherQuery(
 		@RequestParam String cypherQuery, 
 		ModelMap model) {
 		log.debug("Got this cypherQuery: {}", cypherQuery);
 		// var images = imageRep.findImagesByCypherQuery(cypherQuery);
-		var images = imageRep.findImagesByCypherQuery(cypherQuery);
+		var images = imageService.findImagesByCypherQuery(cypherQuery);
 		
 		model.put("cypherQuery", cypherQuery);
 		model.put("images", images);
