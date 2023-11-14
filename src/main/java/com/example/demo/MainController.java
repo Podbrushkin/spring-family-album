@@ -128,7 +128,9 @@ public class MainController {
 		model.addAttribute("image", img);
 		if (images != null) {
 			var current = images.indexOf(img);
-			model.put("previous",images.get(current-1));
+			if (current != 0)
+				model.put("previous",images.get(current-1));
+			if (current != images.size()-1)
 			model.put("next",images.get(current+1));
 		}
 		return "image.html";
