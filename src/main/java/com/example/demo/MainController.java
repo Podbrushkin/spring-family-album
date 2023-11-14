@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.example.demo.model.Image;
 import com.example.demo.model.PersonDto;
 import com.example.demo.model.Tag;
 import com.example.demo.service.ImageService;
@@ -31,7 +31,6 @@ import com.example.demo.service.PersonService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 @Controller
 @SessionAttributes({"selectedTags","selectedYear","currentPage","pageSize","images"})
@@ -80,7 +79,6 @@ public class MainController {
 	public String processQueryParams(
 			@SessionAttribute(required = false) List<String> selectedTags,
 			@SessionAttribute(required = false) Optional<Integer> selectedYear,
-			@RequestParam(name = "goBack", defaultValue = "false") boolean goBack,
 			ModelMap model) {
 		log.trace("SessionAttrs: tags={}, year={}", selectedTags, selectedYear);
 
@@ -90,9 +88,6 @@ public class MainController {
 		var images = imageService.getAllImagesForTags(selectedTags, selectedYear);
 		model.put("images", images);
 		model.put("pageSize", 25);
-		if (!goBack)
-			model.put("currentPage", 1);
-
 		return "index.html";
 	}
 	
@@ -127,15 +122,14 @@ public class MainController {
 
 	@GetMapping("/imagePage/{imgHash:[^\\\\.]+}")
 	public String getImagePageByHash(@PathVariable(required = true) String imgHash,
-			@SessionAttribute(required = false) List<String> selectedTags,
-			@SessionAttribute Optional<Integer> selectedYear,
+			@SessionAttribute(required = false) List<Image> images,
 			ModelMap model) {
 		var img = imageService.getImageForHash(imgHash);
 		model.addAttribute("image", img);
-		if (selectedTags != null) {
-		var prevAndNext = imageService.getNextAndPreviousImages(selectedTags, selectedYear, img);
-			model.put("previous", prevAndNext.get("previous"));
-			model.put("next", prevAndNext.get("next"));
+		if (images != null) {
+			var current = images.indexOf(img);
+			model.put("previous",images.get(current-1));
+			model.put("next",images.get(current+1));
 		}
 		return "image.html";
 	}
@@ -166,7 +160,6 @@ public class MainController {
 		@RequestParam String cypherQuery, 
 		ModelMap model) {
 		log.debug("Got this cypherQuery: {}", cypherQuery);
-		// var images = imageRep.findImagesByCypherQuery(cypherQuery);
 		var images = imageService.findImagesByCypherQuery(cypherQuery);
 		
 		model.put("cypherQuery", cypherQuery);
@@ -179,10 +172,15 @@ public class MainController {
 	
 	@GetMapping(value =  "/")
 	public String cypherGoToPage(
-		@RequestParam(defaultValue = "1") Integer page,
+		@RequestParam(required = false) Integer page,
 		ModelMap model
 	) {
-		model.put("currentPage", page);
+
+		if (page != null)
+			model.put("currentPage", page);
+		else if (!model.containsAttribute("currentPage"))
+			model.put("currentPage", 1);
+
 		return "index.html";
 	}
 

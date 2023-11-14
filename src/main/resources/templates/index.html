@@ -72,12 +72,12 @@
         </ul>
     </div>
 
-    <ul>
-        <li th:text="'totalImages='+${images.size}"></li>
+    <ul th:if="${images != null}">
+        <li th:text="'totalImages='+${images?.size}"></li>
         <li th:text="'totalPages='+${totalPages}"></li>
         <li th:text="'currentPage='+${currentPage}"></li>
         <li th:text="'pageSize='+${pageSize}"></li>
-        <li th:text="'number of pages='+${images.size*1.0/pageSize}"></li>
+        <li th:text="'number of pages='+${images?.size*1.0/pageSize}"></li>
     </ul>
     
 </body>

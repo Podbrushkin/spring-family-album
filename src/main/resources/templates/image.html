@@ -12,7 +12,7 @@
     <!-- <h1>Image Viewer</h1> -->
     <header th:replace="fragments/header :: header" />
     <div class="button-container">
-        <a href="/search?goBack=true">&lt; Галерея</a>
+        <a href="/">&lt; Галерея</a>
     </div>
     <img id="imgSingle" 
         th:src="@{'/image/' + ${image.anyHash}}" 

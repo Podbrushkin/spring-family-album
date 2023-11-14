@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.connectors.BoltConnector;
-import org.neo4j.configuration.helpers.SocketAddress;
 import org.neo4j.cypherdsl.core.renderer.Configuration;
 import org.neo4j.cypherdsl.core.renderer.Dialect;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -42,16 +41,18 @@ public class DemoApplication {
 		return Configuration.newConfig().withDialect(Dialect.NEO4J_5).build();
 	}
 
+	//https://neo4j.com/docs/java-reference/current/java-embedded/setup/
 	@Bean
     public DatabaseManagementService databaseManagementService() {
         DatabaseManagementService managementService = new 
 			DatabaseManagementServiceBuilder(new File("target/mydb").toPath())
 				.setConfig(GraphDatabaseSettings.transaction_timeout, Duration.ofSeconds( 60 ) )
 				.setConfig( BoltConnector.enabled, true )
-				.setConfig( BoltConnector.listen_address, 
-					new SocketAddress( "localhost", 7687 ) 
-					)
-        		.build();
+				// .setConfig( BoltConnector.listen_address, new SocketAddress( "localhost", 7687 ) )
+				.setConfig(BoltConnector.encryption_level, BoltConnector.EncryptionLevel.DISABLED)
+				// .setConfig(HttpConnector.enabled, true)
+				// .setConfig(HttpConnector.listen_address, new SocketAddress("localhost", 7474))
+				.build();
 		registerShutdownHook(managementService);
         return managementService;
     }
