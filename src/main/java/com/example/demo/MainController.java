@@ -171,6 +171,15 @@ public class MainController {
 		
 		return "index.html";
 	}
+
+	@GetMapping(value =  "/execCypherAndGetString")
+	@ResponseBody
+	public String execCypherAndGetString(
+		@RequestParam String cypherQuery, 
+		ModelMap model) {
+		log.debug("Will try to get a string for this cypherQuery: {}", cypherQuery);
+		return imageService.executeReadAndGetResultAsString(cypherQuery);
+	}
 	
 	@GetMapping(value =  "/")
 	public String cypherGoToPage(

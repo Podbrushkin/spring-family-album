@@ -74,4 +74,7 @@ public class ImageService {
     public List<Image> findImagesByCypherQuery(String cypher) {
         return imageRepositoryNeo4j.findImagesByCypherQuery(cypher);
     }
+    public String executeReadAndGetResultAsString(String cypherQuery) {
+        return imageRepositoryNeo4j.executeReadAndGetResultAsString(cypherQuery);
+    }
 }

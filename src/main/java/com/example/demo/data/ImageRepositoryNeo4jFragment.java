@@ -7,4 +7,5 @@ import com.example.demo.model.Image;
 public interface ImageRepositoryNeo4jFragment {
     
     List<Image> findImagesByCypherQuery(String cypherQuery);
+    String executeReadAndGetResultAsString(String cypherQuery);
 }
