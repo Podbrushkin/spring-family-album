@@ -5,7 +5,7 @@
 </head>
 
 <body>
-    <header th:replace="fragments/header :: header" />
+    <header th:replace="~{fragments/header :: header}" />
     <div id="graph">
     </div>
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -18,8 +18,8 @@
         });
     </script>
     
-        
-
+     <p>THIS IS CYPHER</p>
+    <div id="container" style="height: 100%" th:insert="~{fragments/graph :: graph}" ></div>
 
 
     </script>

@@ -12,11 +12,14 @@
 
 <body>
   <header th:replace="fragments/header :: header" />
+
+  <label for="fCypher">Cypher</label>
+  <textarea id="fCypher" name="fCypher"></textarea>
+  <button type="submit" id="submitButton" name="submitButton">Submit</button>
+  <br/>
   <label for="fSearch">Search</label>
   <input type="text" id="fSearch" name="fSearch">
-  <label for="fCypher">Cypher</label>
-  <input type="text" id="fCypher" name="fCypher">
-  <input type="submit" id="submitButton" name="submitButton">
+  
   <div id="example-table" ></div>
 
   <script>
@@ -83,6 +86,7 @@
     
     const submitButton = document.getElementById('submitButton');
     const fCypherInput = document.getElementById('fCypher');
+    fCypherInput.value = cypherQuery;
     
     submitButton.addEventListener('click', () => {
       cypherQuery = fCypherInput.value;

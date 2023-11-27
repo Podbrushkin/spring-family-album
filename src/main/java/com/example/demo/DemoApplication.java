@@ -1,7 +1,8 @@
 package com.example.demo;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -12,7 +13,10 @@ import org.neo4j.cypherdsl.core.renderer.Configuration;
 import org.neo4j.cypherdsl.core.renderer.Dialect;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +35,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @SpringBootApplication
 @EnableNeo4jRepositories
 public class DemoApplication {
-	Logger log = LoggerFactory.getLogger(getClass());
+	private static Logger log = LoggerFactory.getLogger(DemoApplication.class);
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 	}
@@ -45,14 +49,16 @@ public class DemoApplication {
 	@Bean
     public DatabaseManagementService databaseManagementService() {
         DatabaseManagementService managementService = new 
-			DatabaseManagementServiceBuilder(new File("target/mydb").toPath())
+			DatabaseManagementServiceBuilder(Path.of("target","mydb"))
 				.setConfig(GraphDatabaseSettings.transaction_timeout, Duration.ofSeconds( 60 ) )
 				.setConfig( BoltConnector.enabled, true )
 				// .setConfig( BoltConnector.listen_address, new SocketAddress( "localhost", 7687 ) )
 				.setConfig(BoltConnector.encryption_level, BoltConnector.EncryptionLevel.DISABLED)
+				.setConfig(GraphDatabaseSettings.procedure_unrestricted, List.of("apoc.*"))
 				// .setConfig(HttpConnector.enabled, true)
 				// .setConfig(HttpConnector.listen_address, new SocketAddress("localhost", 7474))
 				.build();
+		
 		registerShutdownHook(managementService);
         return managementService;
     }
@@ -63,6 +69,22 @@ public class DemoApplication {
         GraphDatabaseService graphDb =
 			managementService.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
         log.info("Neo4j database Embedded instance is available: {}", graphDb.isAvailable());
+		registerProcedure(graphDb,
+                // apoc.coll.Coll.class,
+                // apoc.map.Maps.class,
+                // apoc.convert.Json.class,
+                // Create.class,
+                // apoc.date.Date.class,
+                // apoc.lock.Lock.class,
+                // apoc.load.LoadJson.class,
+                // // LoadCsv.class,
+                // apoc.load.Xml.class,
+                // apoc.path.PathExplorer.class,
+                // Meta.class,
+                // apoc.refactor.GraphRefactoring.class,
+                //apoc.periodic.Periodic.class
+				apoc.export.json.ExportJson.class,
+				apoc.help.Help.class);
         return graphDb;
     }
 
@@ -76,6 +98,20 @@ public class DemoApplication {
                 managementService.shutdown();
             }
         });
+    }
+
+	public static void registerProcedure(GraphDatabaseService db, Class<?>... procedures) {
+		log.debug("Registering procedures...");
+        GlobalProcedures globalProcedures = ((GraphDatabaseAPI) db).getDependencyResolver().resolveDependency(GlobalProcedures.class);
+        for (Class<?> procedure : procedures) {
+            try {
+                globalProcedures.registerProcedure(procedure);
+                globalProcedures.registerFunction(procedure);
+                globalProcedures.registerAggregationFunction(procedure);
+            } catch (KernelException e) {
+                throw new RuntimeException("while registering " + procedure, e);
+            }
+        }
     }
 
 	

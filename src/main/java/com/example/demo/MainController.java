@@ -88,6 +88,7 @@ public class MainController {
 		var images = imageService.getAllImagesForTags(selectedTags, selectedYear);
 		model.put("images", images);
 		model.put("pageSize", 25);
+		model.put("currentPage", 1);
 		return "index.html";
 	}
 	
@@ -179,6 +180,13 @@ public class MainController {
 		ModelMap model) {
 		log.debug("Will try to get a string for this cypherQuery: {}", cypherQuery);
 		return imageService.executeReadAndGetResultAsString(cypherQuery);
+	}
+
+	@GetMapping(value =  "/getPersonTree")
+	@ResponseBody
+	public String getPersonTree() {
+		log.debug("Requested person tree");
+		return personService.getPersonGraphJson();
 	}
 	
 	@GetMapping(value =  "/")

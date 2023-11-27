@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: LightGrey;
+  background-color: #c0c0c0;
 }
 
 .navbar {
@@ -49,8 +49,8 @@ body {
   font-size: 120%;
 }
 
-.checkboxForm button[type="submit"] {
-  background-color: #4CAF50;
+button[type="submit"], .button {
+  /* background-color: #4CAF50;
   border: none;
   color: white;
   padding: 10px 20px;
@@ -59,12 +59,33 @@ body {
   display: inline-block;
   font-size: 16px;
   cursor: pointer;
-  border-radius: 5px; 
+  border-radius: 5px;  */
+  -webkit-font-smoothing: none;
+  font-family: "Pixelated MS Sans Serif",Arial;
+  /* font-size: 11px; */
+  border: none;
+  border-radius: 0;
+  box-sizing: border-box;
+  color: transparent;
+  min-height: 23px;
+  min-width: 75px;
+  padding: 0 12px;
+  text-shadow: 0 0 #222;
+  background: silver;
+  box-shadow: inset -1px -1px #0a0a0a,inset 1px 1px #fff,inset -2px -2px grey,inset 2px 2px #dfdfdf;
 }
 
 
-.checkboxForm button[type="submit"]:hover {
-  background-color: #3e8e41;
+button[type="submit"]:hover, .button:hover {
+  /* background-color: #3e8e41; */
+  outline: 1px dotted #000;
+  outline-offset: -4px;
+
+}
+
+button[type="submit"]:active, .button:active {
+  box-shadow: inset -1px -1px #fff,inset 1px 1px #0a0a0a,inset -2px -2px #dfdfdf,inset 2px 2px grey;
+  text-shadow: 1px 1px #222;
 }
 
 .checkboxForm {
@@ -87,6 +108,10 @@ body {
   border-radius: 5px;
 }
 
+
+input[type="checkbox"] {
+  box-shadow: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
+}
 input[type="checkbox"]:hover {
   outline: 2px solid grey;
 }
@@ -95,9 +120,9 @@ input[type=checkbox]:checked ~ label {
   font-weight: bold;
 }
 
-.button-container a {
+/* .button-container a {
   background-color: #4CAF50;
-  /* background-color: #ff69b4; */
+  background-color: #ff69b4;
   border: none;
   color: white;
   padding: 10px 20px;
@@ -110,7 +135,7 @@ input[type=checkbox]:checked ~ label {
 }
 .button-container a:hover {
   background-color: #3e8e41;
-}
+} */
 
 #imgSingle {
   max-width: 100%;

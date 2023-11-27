@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- th:text="${#authentication.name}" -->
+</head>
+
+<body>
+    <div th:fragment="graph" id="container">
+    
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <script type="text/javascript">
+        var dom = document.getElementById('container');
+        var myChart = echarts.init(dom, null, {
+            renderer: 'canvas',
+            useDirtyRect: false
+        });
+        var app = {};
+
+        var option;
+        myChart.showLoading();
+
+
+        fetch("/getPersonTree")
+        .then(resp => resp.json())
+            .then(graph => {
+            const nodesMap = new Map();
+            console.log('graph.size='+graph);
+            console.log(graph);
+
+            graph.nodes.forEach((node, index) => {
+                nodesMap.set(node.id, index); // Map each node ID to its index
+                node.name = node.properties.fullName;
+                console.log(node.name);
+            });
+
+            graph.rels.forEach(link => {
+                const sourceIndex = nodesMap.get(link.start.id); // Get the index for the source node ID
+                const targetIndex = nodesMap.get(link.end.id); // Get the index for the target node ID
+                //console.log(sourceIndex +"->"+targetIndex);
+                link.source = sourceIndex; // Replace the ID with the index
+                link.target = targetIndex; // Replace the ID with the index
+            });
+
+
+
+            myChart.hideLoading();
+            option = {
+                tooltip: {},
+                series: [
+                    {
+                        name: 'Person',
+                        type: 'graph',
+                        layout: 'force',
+                        data: graph.nodes,
+                        links: graph.rels,
+                        roam: true,
+                        label: {
+                            show: true,
+                            position: 'right',
+                            formatter: '{b}'
+                        },
+                        labelLayout: {
+                            hideOverlap: true
+                        },
+                        scaleLimit: {
+                            min: 0.4,
+                            max: 2
+                        },
+                        lineStyle: {
+                            color: 'source',
+                            curveness: 0.3
+                        },
+                        emphasis: {
+                            //focus: 'adjacency',
+                            lineStyle: {
+                                width: 10
+                            }
+                        },
+                        animationDuration: 1500,
+                        //animationEasingUpdate: 'quinticInOut',
+                        force: {
+                            repulsion: 50,
+                            gravity: 0.1
+                        },
+                        draggable: true
+                    }
+                ]
+            };
+            myChart.setOption(option);
+
+
+            if (option && typeof option === 'object') {
+                myChart.setOption(option);
+            }
+
+            window.addEventListener('resize', myChart.resize);
+        }).catch(err => {console.log(err)});
+
+    </script>
+
+    </div>
+
+</body>
+
+</html>

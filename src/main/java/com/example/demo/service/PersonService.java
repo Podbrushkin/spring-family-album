@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,35 +23,34 @@ import com.example.demo.model.PersonDto;
 
 @Service
 public class PersonService {
-    Logger log = LoggerFactory.getLogger(getClass());
-    PersonRepository personRepository;
-    ImageRepositoryNeo4j imageRepositoryNeo4j;
-    Collection<PersonDto> allDepictedWithCountsDto;
+    private static Logger log = LoggerFactory.getLogger(PersonService.class);
+    private PersonRepository personRepository;
+    private ImageRepositoryNeo4j imageRepositoryNeo4j;
+    private Collection<PersonDto> allDepictedWithCountsDto;
     @Autowired
-    GraphvizProcessor graphvizProcessor;
+    private GraphvizProcessor graphvizProcessor;
+    @Autowired
+    private GraphDatabaseService graphDatabaseService;
 
     public PersonService(PersonRepository personRepository, ImageRepositoryNeo4j imageRepositoryNeo4j) {
         this.imageRepositoryNeo4j = imageRepositoryNeo4j;
         this.personRepository = personRepository;
     }
 
-    public Collection<Person> getPersonsForTags(Collection<String> tags) {
-        List<Person> persons = new ArrayList<>();
-        var bdayTags = tags.stream()
-                .filter(t -> t.matches("\\d{4}-\\d{2}-\\d{2}"))
-                .map(s -> LocalDate.parse(s))
-                .toList();
-
-        persons.addAll(personRepository.findAllByBirthdayIn(bdayTags));
-        log.trace("Found {} persons by bday", persons.size());
-
-        var nameTags = tags.stream()
-                .filter(t -> !t.matches("\\d{4}-\\d{2}-\\d{2}"))
-                .toList();
-
-        persons.addAll(personRepository.findAllByFullNameIn(nameTags));
-        log.trace("Found {} persons for tags: {}.", persons.size(), tags);
-        return persons;
+    public String getPersonGraphJson() {
+        String cypher = """
+            MATCH (nod:Person)
+            MATCH ()-[rels:HAS_CHILD]->()
+            WITH collect(DISTINCT nod) as a, collect(DISTINCT rels) as b
+            CALL apoc.export.json.data(a, b, null, { jsonFormat: 'JSON', stream: true})
+            YIELD data
+            RETURN data
+            """;
+        try (var tx = graphDatabaseService.beginTx()) {
+            var result = tx.execute(cypher);
+            String json = (String) result.next().values().iterator().next();
+            return json;
+        }
     }
 
     public Collection<Person> findAllDepictedByAtLeastOneImage() {
