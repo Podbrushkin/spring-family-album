@@ -142,7 +142,7 @@ public class MainController {
 	}
 	@GetMapping(value = "/showTable")
 	public String table(ModelMap model) {
-		return "table.html";
+		return "tableAndChart.html";
 	}
 	@GetMapping(value = "/showFamilyTree")
 	public String tree(ModelMap model) {
@@ -202,6 +202,4 @@ public class MainController {
 
 		return "index.html";
 	}
-
-
 }

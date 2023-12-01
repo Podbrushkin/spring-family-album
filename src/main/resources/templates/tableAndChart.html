@@ -1,0 +1,117 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Table with Sortable Columns</title>
+    <link href="../../../resources/static/styles.css" rel="stylesheet" media="screen" th:href="@{styles.css}" />
+    <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script th:src="@{~/createPieChart.js}"></script>
+
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+
+</head>
+
+<body>
+    <header th:replace="fragments/header :: header" />
+
+    <label for="fCypher">Cypher</label>
+    <textarea id="fCypher" name="fCypher"></textarea>
+    <button type="submit" id="submitButton" name="submitButton">Submit</button>
+    <br />
+    <label for="fSearch">Search</label>
+    <input type="text" id="fSearch" name="fSearch">
+    
+    <div id="example-table"></div>
+
+    <p>THIS IS PIECHART</p>
+    <!-- <div id="containerPie" style="height: 100%" th:insert="~{fragments/piechart :: piechart}"></div> -->
+    <div id="containerPie" style="height: 100%"></div>
+
+    <script>
+        var cypherQuery = 'MATCH (n:Person) RETURN n.fullName, n.birthday, n.dotId';
+        getDataFromEndpoint(cypherQuery)
+            .then(data => {
+                console.log("we got size:" + data.length);
+                createTable(data);
+            });
+
+        const submitButton = document.getElementById('submitButton');
+        const fCypherInput = document.getElementById('fCypher');
+        fCypherInput.value = cypherQuery;
+
+        submitButton.addEventListener('click', () => {
+            cypherQuery = fCypherInput.value;
+            getDataFromEndpoint(cypherQuery).then(data => {
+                createTable(data);
+                createPieChart(data);
+            });
+
+        });
+
+
+
+        function getDataFromEndpoint(cypherQuery) {
+            const queryParams = new URLSearchParams({ cypherQuery: cypherQuery });
+            const url = `http://localhost:8080/execCypherAndGetString?${queryParams}`;
+
+            return fetch(url)
+                .then(response => response.text());
+        }
+
+        function createTable(data) {
+            function textTo2dArray(text) {
+                const rows = text.trim().split('\n');
+                const arrayData = rows.map(row => row.split('\t'));
+
+                // tabulator doesn't like dots in column names:
+                arrayData[0].forEach((header, index) => {
+                    arrayData[0][index] = header.replace('.', '•');
+                });
+                console.log(arrayData.length);
+                return arrayData;
+            }
+            data = textTo2dArray(data);
+            // https://tabulator.info/docs/5.5/options
+            var table = new Tabulator("#example-table", {
+                data: data,
+                importFormat: "array",
+                height: "90vh",
+                layout: "fitColumns",
+                autoColumns: true,
+            });
+
+
+            function matchAny(data, filterParams) {
+                //data - the data for the row being filtered
+                //filterParams - params object passed to the filter
+                //RegExp - modifier "i" - case insensitve
+
+                var match = false;
+                const regex = RegExp(filterParams.value, 'i');
+
+                for (var key in data) {
+                    if (regex.test(data[key]) == true) {
+                        match = true;
+                    }
+                }
+                return match;
+            }
+            const input = document.getElementById("fSearch");
+            input.addEventListener("keyup", function () {
+                table.setFilter(matchAny, { value: input.value });
+                if (input.value == " ") {
+                    table.clearFilter()
+                }
+            });
+            table.setData(data);
+        }
+
+        
+
+
+    </script>
+</body>
+
+</html>
