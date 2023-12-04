@@ -47,6 +47,30 @@
         </li>
     </ul>
     <div th:if="${image.people.size == 1} ">
+    <h2>Также фотографировался с:</h2>
+    <div id="containerPie" style="height: 30em"></div>
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script th:src="@{~/createPieChart.js}"></script>
+    <script>
+        var personId = '[[${image.people[0].id}]]';
+        const regex = /:(\d+)$/;
+
+        const matches = regex.exec(personId);
+        const clearId = matches[1];
+        console.log('clear id:'+clearId);
+        var cypherQuery = `MATCH (p:Person)<-[:DEPICTS]-(i:Image)-[:DEPICTS]->(other_person:Person) WHERE id(p) = ${clearId} RETURN [other_person.fullName, other_person.birthday] AS person , COUNT(i) as count ORDER BY count DESC`;
+        console.log('Going to send this cypher:');
+        console.log(cypherQuery);
+
+        const queryParams = new URLSearchParams({ cypherQuery: cypherQuery });
+        const url = `http://localhost:8080/execCypherAndGetString?${queryParams}`;
+
+        fetch(url)
+            .then(response => response.text())
+            .then(data => createPieChart(data));
+    </script>
+
     <h2>Граф:</h2>
     <div id="graph">
     </div>
