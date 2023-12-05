@@ -69,6 +69,23 @@ function createPieChart(data) {
     }
 
     window.addEventListener('resize', myChart.resize);
+
+    if (clearPersonId != null) {
+        // make clickable
+        console.log('clearPersonId:');
+        console.log(clearPersonId);
+        
+        myChart.on('click', 'series', function (params) {
+            console.log(params.data);
+
+            var cypherQuery = `MATCH (p:Person)<-[:DEPICTS]-(i:Image)-[:DEPICTS]->(other_person:Person) 
+            WHERE id(p) = ${clearPersonId} 
+            AND id(other_person) = ${params.data.id}
+            RETURN i ORDER BY i.creationDate`;
+            console.log(cypherQuery);
+            window.location.href = "/findImagesByCypherQuery?cypherQuery=" + encodeURIComponent(cypherQuery);
+        });
+    }
     
     function combineObjectsIntoOther(items, threshold) {
         const sortedItems = items.sort((a, b) => b.value - a.value);
@@ -181,7 +198,7 @@ function createBarChart(data) {
     };
     console.log('clickable?');
     console.log(clearImgId);
-    if (true || data[0].link != null) {
+    if (clearImgId != null) {
         myChart.on('click', 'series', function (params) {
             console.log(params.name);
             var year = params.name;
