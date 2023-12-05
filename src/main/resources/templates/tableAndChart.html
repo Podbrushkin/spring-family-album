@@ -8,6 +8,7 @@
     <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script th:src="@{~/createPieChart.js}"></script>
+    <!-- <script th:src="@{~/createBarChart.js}"></script> -->
 
     <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 
@@ -27,7 +28,8 @@
 
     <p>THIS IS PIECHART</p>
     <!-- <div id="containerPie" style="height: 100%" th:insert="~{fragments/piechart :: piechart}"></div> -->
-    <div id="containerPie" style="height: 100%"></div>
+    <div id="containerPie" style="height: 50%"></div>
+    <div id="barChart" style="height: 50%"></div>
 
     <script>
         var cypherQuery = 'MATCH (n:Person) RETURN n.fullName, n.birthday, n.dotId';
@@ -36,6 +38,7 @@
                 console.log("we got size:" + data.length);
                 createTable(data);
                 createPieChart(data);
+                createBarChart(data);
             });
 
         const submitButton = document.getElementById('submitButton');
@@ -47,6 +50,7 @@
             getDataFromEndpoint(cypherQuery).then(data => {
                 createTable(data);
                 createPieChart(data);
+                createBarChart(data);
             });
 
         });
@@ -68,7 +72,7 @@
 
                 // tabulator doesn't like dots in column names:
                 arrayData[0].forEach((header, index) => {
-                    arrayData[0][index] = header.replace('.', '•');
+                    arrayData[0][index] = header.replaceAll('.', '•');
                 });
                 console.log(arrayData.length);
                 return arrayData;

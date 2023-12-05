@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <title>Image Viewer</title>
     <link rel="stylesheet" media="screen" th:href="@{~/styles.css}" />
-    
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script th:src="@{~/createPieChart.js}"></script>
 </head>
 
 <body>
@@ -36,6 +38,7 @@
             <a th:href="@{/processForm(tag=${tag.birthdayOrFullName})}" th:text="${tag.fullName}"></a>
         </li>
     </ul>
+    <div th:if="${image.comments.size != 0} ">
     <h2>Комментарии:</h2>
     <ul class="messagesList">
         <li th:each="cmnt : ${image.comments}">
@@ -46,20 +49,20 @@
             <span th:text="${cmnt.text}"></span>
         </li>
     </ul>
+    </div>
     <div th:if="${image.people.size == 1} ">
     <h2>Также фотографировался с:</h2>
     <div id="containerPie" style="height: 30em"></div>
-    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script th:src="@{~/createPieChart.js}"></script>
+    
+    
     <script>
         var personId = '[[${image.people[0].id}]]';
         const regex = /:(\d+)$/;
 
-        const matches = regex.exec(personId);
+        var matches = regex.exec(personId);
         const clearId = matches[1];
         console.log('clear id:'+clearId);
-        var cypherQuery = `MATCH (p:Person)<-[:DEPICTS]-(i:Image)-[:DEPICTS]->(other_person:Person) WHERE id(p) = ${clearId} RETURN [other_person.fullName, other_person.birthday] AS person , COUNT(i) as count ORDER BY count DESC`;
+        var cypherQuery = `MATCH (p:Person)<-[:DEPICTS]-(i:Image)-[:DEPICTS]->(other_person:Person) WHERE id(p) = ${clearId} RETURN [other_person.fullName, other_person.birthday] AS name, COUNT(i) as value ORDER BY value DESC`;
         console.log('Going to send this cypher:');
         console.log(cypherQuery);
 
@@ -87,6 +90,32 @@
         });
     </script>
     </div>
+    <div id="barChart" style="height: 30em"></div>
+    <script>
+        // var people = [[${image}]];
+        // var personId = image.people[0].id
+        var imageId = '[[${image.id}]]';
+        var regex = /:(\d+)$/;
+        matches = regex.exec(imageId);
+        const clearImgId = matches[1];
+        console.log('delme reporting in. imageId=');
+        console.log(imageId);
+        var cypherQuery = `MATCH (i:Image)-[:DEPICTS]->(p:Person)
+WHERE id(i) = ${clearImgId}
+WITH collect(p) AS target
+MATCH (i:Image)-[:DEPICTS]->(p:Person)
+WITH i, collect(p) as src, target
+WHERE all(pers IN target WHERE (i)-[:DEPICTS]->(pers))
+RETURN i.creationDate.year AS name, count(i) AS value
+ORDER BY name
+`;
+queryParams = new URLSearchParams({ cypherQuery: cypherQuery });
+url = `http://localhost:8080/execCypherAndGetString?${queryParams}`;
+
+        fetch(url)
+            .then(response => response.text())
+            .then(data => createBarChart(data));
+    </script>
 </body>
 
 </html>

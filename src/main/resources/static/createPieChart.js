@@ -4,7 +4,7 @@ function createPieChart(data) {
     console.log('pie: data2:');
     console.log(data);
     // data = findNumColumnAndRename(data);
-    data = transformArray(data);
+    // data = transformArray(data);
     console.log('pie: data3:');
     console.log(data);
     data = combineObjectsIntoOther(data, 20);
@@ -16,7 +16,6 @@ function createPieChart(data) {
         renderer: 'canvas',
         useDirtyRect: false
     });
-    var app = {};
 
     var option;
 
@@ -70,24 +69,7 @@ function createPieChart(data) {
     }
 
     window.addEventListener('resize', myChart.resize);
-    function convertTsvToArrayOfObjects(tsv) {
-        const lines = tsv.split('\n');
-        const headers = lines[0].split('\t');
-        const result = [];
-
-        for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split('\t');
-            const obj = {};
-
-            for (let j = 0; j < headers.length; j++) {
-                obj[headers[j]] = values[j];
-            }
-
-            result.push(obj);
-        }
-
-        return result;
-    }
+    
     function combineObjectsIntoOther(items, threshold) {
         const sortedItems = items.sort((a, b) => b.value - a.value);
 
@@ -160,4 +142,87 @@ function createPieChart(data) {
             return newObj;
         });
     }
+}
+
+function createBarChart(data) {
+    data = convertTsvToArrayOfObjects(data);
+    console.log('in barChart');
+    // console.log(data);
+    // console.log(data.year);
+    // console.log(data.value);
+
+    var dom = document.getElementById('barChart');
+    var myChart = echarts.init(dom, null, {
+        renderer: 'canvas',
+        useDirtyRect: false
+    });
+
+    var option;
+    option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+        xAxis: {
+            type: 'category',
+            data: data.map(obj => obj.name),
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                data: data.map(obj => obj.value),
+              type: 'bar'
+            }
+          ]
+    };
+    console.log('clickable?');
+    console.log(clearImgId);
+    if (true || data[0].link != null) {
+        myChart.on('click', 'series', function (params) {
+            console.log(params.name);
+            var year = params.name;
+            
+            // clearImgId is declared outside...
+            var cypherQuery = `MATCH (i:Image)-[:DEPICTS]->(p:Person)
+WHERE id(i) = ${clearImgId}
+WITH collect(p) AS target
+MATCH (i:Image)-[:DEPICTS]->(p:Person)
+WITH i, collect(p) as src, target
+WHERE all(pers IN target WHERE (i)-[:DEPICTS]->(pers))
+AND i.creationDate.year = ${year}
+RETURN i
+ORDER BY i.creationDate
+`;
+            window.location.href = "/findImagesByCypherQuery?cypherQuery=" + encodeURIComponent(cypherQuery);
+            // window.open(
+            //     'https://www.google.com/search?q=' + encodeURIComponent(params.name)
+            //   );
+            
+        });
+    }
+    myChart.setOption(option);
+    window.addEventListener('resize', myChart.resize);
+}
+
+function convertTsvToArrayOfObjects(tsv) {
+    const lines = tsv.split('\n');
+    const headers = lines[0].split('\t');
+    const result = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split('\t');
+        const obj = {};
+
+        for (let j = 0; j < headers.length; j++) {
+            obj[headers[j]] = values[j];
+        }
+
+        result.push(obj);
+    }
+
+    return result;
 }
